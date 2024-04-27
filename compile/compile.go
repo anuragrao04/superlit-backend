@@ -6,23 +6,24 @@ package compile
 
 import (
 	"bytes"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/anuragrao04/superlit-backend/models"
 	"github.com/google/uuid"
 )
 
-func RunCode(w http.ResponseWriter, r *http.Request) {
+func RunCode(c *gin.Context) {
 	var runRequest models.RunRequest
-	err := json.NewDecoder(r.Body).Decode(&runRequest)
+	err := c.BindJSON(&runRequest)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error decoding request. You've sent me an invalid JSON!"))
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
 		return
 	}
 
@@ -39,14 +40,15 @@ func RunCode(w http.ResponseWriter, r *http.Request) {
 	file, err := os.Create("./playground/" + uuid.New().String() + "." + runRequest.Language)
 	if err != nil {
 		log.Println(err)
-		w.Write([]byte("Error Writing to file"))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error Writing to file"})
 		return
 	}
 	// write the code to the file
 	file.Write([]byte(runRequest.Code))
+
 	if err := file.Close(); err != nil {
 		log.Println(err)
-		w.Write([]byte("Error closing file"))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error closing file"})
 		return
 	}
 
@@ -64,8 +66,7 @@ func RunCode(w http.ResponseWriter, r *http.Request) {
 		if err := cmd.Run(); err != nil {
 			log.Println("Compilation Failed")
 			log.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write(stderr.Bytes())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Compilation Failed"})
 			return
 		}
 
@@ -81,7 +82,8 @@ func RunCode(w http.ResponseWriter, r *http.Request) {
 		os.Remove(file.Name() + ".out")
 
 		// send the output back
-		w.Write([]byte(out.String()))
+		c.JSON(http.StatusOK, gin.H{"output": out.String()})
+
 	} else if runRequest.Language == "python" {
 		// we don't need to compiule python code, we can directly run it
 		cmd := exec.Command("python", file.Name())
@@ -94,7 +96,7 @@ func RunCode(w http.ResponseWriter, r *http.Request) {
 		os.Remove(file.Name())
 
 		// send the output back
-		w.Write([]byte(out.String()))
+		c.JSON(http.StatusOK, gin.H{"output": out.String()})
 	}
 
 }

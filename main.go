@@ -3,15 +3,24 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/anuragrao04/superlit-backend/compile"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	router := mux.NewRouter()
+	router := gin.Default()
 
-	router.HandleFunc("/run", compile.RunCode).Methods("POST")
+	router.POST("/run", compile.RunCode)
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	s := &http.Server{
+		Addr:         ":6969",
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		// MaxHeaderBytes: 1 << 20,
+	}
+	log.Println("Listening on port 6969.")
+	s.ListenAndServe()
 }
