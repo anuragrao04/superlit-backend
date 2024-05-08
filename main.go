@@ -11,7 +11,9 @@ import (
 
 func main() {
 	router := gin.Default()
+	// initialise the router
 
+	// These are the routes available. No other routes apart from these will be available. All routes must be defined here.
 	router.POST("/run", compile.RunCode)
 
 	s := &http.Server{
@@ -19,7 +21,6 @@ func main() {
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		// MaxHeaderBytes: 1 << 20,
 	}
 	log.Println("Listening on port 6969.")
 	s.ListenAndServe()
