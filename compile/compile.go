@@ -47,7 +47,14 @@ func RunCode(c *gin.Context) {
 		// compile the code
 		compiledBinary, err := CompileBinary(codeFile, runRequest.Language)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Compilation Failed"})
+			// if the error is due to client code problem, we need to send the error to the client
+			if err.Error() == "Client Code Problem" {
+				c.JSON(http.StatusOK, gin.H{"output": compiledBinary})
+				return
+			}
+
+			log.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -67,6 +74,9 @@ func RunCode(c *gin.Context) {
 		os.Remove(codeFile)
 		// send the output back
 		c.JSON(http.StatusOK, gin.H{"output": output})
+	} else {
+		c.Status(http.StatusTeapot)
+		return
 	}
 }
 
@@ -118,9 +128,17 @@ func CompileBinary(file string, language string) (compiledBinary string, err err
 		cmd := exec.Command("gcc", file, "-o", file+".out")
 		var stderr bytes.Buffer
 		cmd.Stderr = &stderr
+		var stdout bytes.Buffer
+		cmd.Stdout = &stdout
 
 		// log any error in the above compilation
 		if err := cmd.Run(); err != nil {
+
+			// we need to by pass and send the error to client if the problem is with the code
+			// and not with the compilation
+			if err.Error() == "exit status 1" {
+				return stderr.String() + stdout.String(), errors.New("Client Code Problem")
+			}
 			log.Println("Compilation Failed")
 			log.Println(err)
 			return "", err
