@@ -6,12 +6,21 @@ import (
 	"time"
 
 	"github.com/anuragrao04/superlit-backend/compile"
+	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
 	// initialise the router
+
+	// connect to the database
+	_, err := database.Connect("holy.db")
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("Connected to the database.")
+	}
 
 	// These are the routes available. No other routes apart from these will be available. All routes must be defined here.
 	router.POST("/run", compile.RunCode)
