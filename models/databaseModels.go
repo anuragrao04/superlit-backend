@@ -12,7 +12,7 @@ type User struct {
 	Name         string
 	Email        string
 	Password     string
-	isTeacher    bool
+	IsTeacher    bool
 	Classrooms   []Classroom `gorm:"many2many:user_classroom;"`
 }
 

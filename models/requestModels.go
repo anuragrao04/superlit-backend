@@ -15,15 +15,22 @@ type SubmitRequest struct {
 	TestID   string `json:"testID"` // this will be the test ID of the test stored in the database
 }
 
-type RegisterRequest struct {
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	Email     string `json:"email"`
-	IsTeacher bool   `json:"isTeacher"` // true if the registering user is a teacher. Else, they are a student
+type SignUpRequest struct {
+	UniversityID string `json:"universityID"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	IsTeacher    bool   `json:"isTeacher"` // true if the registering user is a teacher. Else, they are a student
 }
 
-type LoginRequest struct {
-	Username  string `json:"username"`
+type SignInRequestUniversityID struct {
+	UniversityID string `json:"universityID"`
+	Password     string `json:"password"`
+	IsTeacher    bool   `json:"isTeacher"` // true if the user is a teacher. Else, they are a student
+}
+
+type SignInRequestEmail struct {
+	Email     string `json:"email"`
 	Password  string `json:"password"`
 	IsTeacher bool   `json:"isTeacher"` // true if the user is a teacher. Else, they are a student
 }

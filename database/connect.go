@@ -6,11 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
+var DB *gorm.DB // other packages can access this variable
+
 func Connect(dbFilePath string) (*gorm.DB, error) {
-	db, err := gorm.Open(sqlite.Open(dbFilePath), &gorm.Config{})
+	var err error
+	DB, err = gorm.Open(sqlite.Open(dbFilePath), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	db.AutoMigrate(&models.User{}, &models.Classroom{}, &models.Assignment{}, &models.Submission{}, &models.TestCase{}, &models.Question{})
-	return db, nil
+	DB.AutoMigrate(&models.User{}, &models.Classroom{}, &models.Assignment{}, &models.Submission{}, &models.TestCase{}, &models.Question{})
+	return DB, nil
 }
