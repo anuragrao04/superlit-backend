@@ -11,7 +11,6 @@ func Connect(dbFilePath string) (*gorm.DB, error) {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	// the below is errr because err is already defined before. This error returns a function
-	db.AutoMigrate(&models.User{}, &models.Classroom{}, &models.Assignment{}, &models.Submission{})
+	db.AutoMigrate(&models.User{}, &models.Classroom{}, &models.Assignment{}, &models.Submission{}, &models.TestCase{}, &models.Question{})
 	return db, nil
 }

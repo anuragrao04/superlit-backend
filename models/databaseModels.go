@@ -63,12 +63,14 @@ type Question struct {
 	AssignmentID   uint
 	Title          string
 	Question       string
-	ExampleCases   []TestCase `gorm:"many2many:question_example_cases;"`
+	ExampleCases   []TestCase
 	PreWrittenCode string
-	TestCases      []TestCase `gorm:"many2many:question_testcases;"`
+	TestCases      []TestCase
 }
 
 type TestCase struct {
+	gorm.Model
+	QuestionID     uint
 	Input          string
 	ExpectedOutput string
 	Score          int // score achieved by the student if the output matches the expected output
