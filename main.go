@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/anuragrao04/superlit-backend/auth"
+	classroom "github.com/anuragrao04/superlit-backend/classRoom"
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/gin-gonic/gin"
@@ -34,6 +35,12 @@ func main() {
 	// this route is for signing in with a University ID
 	// TODO signing with email
 	router.POST("./auth/signinwithuniversityid", auth.SignInWithUniversityID)
+
+	// this route is for creating a new classroom
+	router.POST("/classroom/create", classroom.CreateClassroom)
+
+	// add a user to a classroom. Regardless of if a user is a teacher or a student, they hit this route
+	router.POST("/classroom/adduser", classroom.AddUserToClassroom)
 
 	s := &http.Server{
 		Addr:         ":6969",

@@ -20,8 +20,7 @@ type Classroom struct {
 	gorm.Model
 	Name        string
 	Code        string       // this is the code that students will use to join the classroom
-	Students    []User       `gorm:"many2many:student_classroom;"`
-	Teachers    []User       `gorm:"many2many:teacher_classroom;"`
+	Users       []User       `gorm:"many2many:user_classroom;"`
 	Assignments []Assignment `gorm:"many2many:assignment_classroom;"`
 }
 
