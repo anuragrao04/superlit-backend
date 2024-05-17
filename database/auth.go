@@ -24,7 +24,7 @@ func GetUserByUniversityIDPassword(UniversityID string, Password string) (user m
 		log.Println("DB is nil. Not connected to database")
 	}
 
-	err = DB.Preload("Classrooms").Preload("Classrooms.Users").Preload("Classrooms.Assignments").Where("university_id = ? AND password = ?", UniversityID, Password).First(&user).Error
+	err = DB.Preload("Classrooms").Preload("Classrooms.Assignments").Where("university_id = ? AND password = ?", UniversityID, Password).First(&user).Error
 	if err != nil {
 		log.Println(err)
 	}
