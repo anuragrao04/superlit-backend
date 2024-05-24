@@ -6,15 +6,19 @@ import (
 	"time"
 
 	"github.com/anuragrao04/superlit-backend/auth"
-	classroom "github.com/anuragrao04/superlit-backend/classRoom"
+	"github.com/anuragrao04/superlit-backend/classRoom"
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
 	router := gin.Default()
 	// initialise the router
+
+	// load envs
+	godotenv.Load()
 
 	// connect to the database
 	_, err := database.Connect("holy.db")
