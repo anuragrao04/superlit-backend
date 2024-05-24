@@ -9,6 +9,7 @@ import (
 	"github.com/anuragrao04/superlit-backend/classRoom"
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
+	"github.com/anuragrao04/superlit-backend/tokens"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,8 +21,15 @@ func main() {
 	// load envs
 	godotenv.Load()
 
+	// load the JWT Secret Key
+	err := tokens.LoadECPrivateKey("private_key.pem")
+	if err != nil {
+		log.Println(err)
+		log.Fatal("Error loading private key")
+	}
+
 	// connect to the database
-	_, err := database.Connect("holy.db")
+	_, err = database.Connect("holy.db")
 	if err != nil {
 		log.Fatal(err)
 	} else {
@@ -38,7 +46,11 @@ func main() {
 
 	// this route is for signing in with a University ID
 	// TODO signing with email
-	router.POST("./auth/signinwithuniversityid", auth.SignInWithUniversityID)
+	router.POST("/auth/signinwithuniversityid", auth.SignInWithUniversityID)
+
+	// this route is for users who've forgotten their password.
+	// It takes in University ID and sends a password reset link to their email
+	router.POST("/auth/forgotpassword", auth.ForgotPassword)
 
 	// this route is for creating a new classroom
 	router.POST("/classroom/create", classroom.CreateClassroom)

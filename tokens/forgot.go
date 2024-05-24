@@ -1,32 +1,35 @@
 package tokens
 
 import (
+	"crypto/ecdsa"
 	"errors"
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
 	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
+	"log"
 	"os"
 	"time"
 )
 
-func CreateForgotLink(universityID int) (link string, err error) {
+var JWT_SECRET *ecdsa.PrivateKey
+
+func CreateForgotLink(universityID string) (link, email string, err error) {
 	// first we see if there is a user with the given ID
 	user := &models.User{}
 
+	if database.DB == nil {
+		log.Println("DB is nil. Not connected to database")
+	}
 	err = database.DB.Where("university_id = ?", universityID).First(&user).Error
 
 	// guard clause to get out if user does not exist
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return "", errors.New("User doesn't exist")
+		return "", "", errors.New("User doesn't exist")
 	}
-
-	// Making a JWT Token
-	JWT_SECRET := os.Getenv("JWT_SECRET")
 
 	// user.Password is an encrypted version of the password.
 	// we will verify the signature at the time of reset password using this key
-	uniqueSigningKey := JWT_SECRET + user.Password
 	ttl := 15 * time.Minute
 	token := jwt.NewWithClaims(jwt.SigningMethodES256,
 		jwt.MapClaims{
@@ -35,11 +38,36 @@ func CreateForgotLink(universityID int) (link string, err error) {
 			"exp":          time.Now().Add(ttl).Unix(),
 		})
 
-	signedToken, err := token.SignedString(uniqueSigningKey)
+	if err != nil {
+		log.Fatal(err)
+	}
+	signedToken, err := token.SignedString(JWT_SECRET)
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return signedToken, nil
+	FRONTEND_FORGOT_PASS_URL := os.Getenv("FRONTEND_FORGOT_PASS_URL")
+	// the ENV Variable must include the http(s):// prefix along with the path to the forgot password page
+	// for example https://superlit.vercel.app/auth/forgotpassword/
+	// INCLUDE TRAILING SLASH!
+
+	link = FRONTEND_FORGOT_PASS_URL + signedToken
+
+	return link, user.Email, nil
+}
+
+func LoadECPrivateKey(pathToKeyFile string) error {
+	keyData, err := os.ReadFile(pathToKeyFile)
+	if err != nil {
+		return errors.New("error reading key file")
+	}
+
+	privateKey, err := jwt.ParseECPrivateKeyFromPEM(keyData)
+	if err != nil {
+		return err
+	}
+
+	JWT_SECRET = privateKey
+	return nil
 }

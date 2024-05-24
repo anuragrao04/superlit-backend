@@ -2,22 +2,25 @@ package mailers
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"gopkg.in/gomail.v2"
 )
 
 // this function takes the signed resetLink string and email.
+// It is run as a go routine and does not stall the http request. Hence all errors must be handled here itself
 // It sends an email to the user with the given token with a nice message
 // console and all
 // be emotional
 // users are dum but we're here to save the day!
-func SendForgotPasswordEmail(email string, resetLink string) error {
+func SendForgotPasswordEmail(resetLink, email string) {
 	OUR_EMAIL := os.Getenv("EMAILID")
 	OUR_PASSWORD := os.Getenv("EMAILPASSWORD")
 
 	if OUR_EMAIL == "" || OUR_PASSWORD == "" {
-		return fmt.Errorf("email credentials are not set in environment variables")
+		log.Println("email credentials are not set in environment variables")
+		return
 	}
 
 	message := gomail.NewMessage()
@@ -42,9 +45,9 @@ func SendForgotPasswordEmail(email string, resetLink string) error {
 
 	// Send the email
 	if err := dialer.DialAndSend(message); err != nil {
-		return fmt.Errorf("failed to send email: %v", err)
+		log.Println("failed to send email: ", err)
 	}
 
 	fmt.Println("Reset password email sent successfully to", email)
-	return nil
+	return
 }

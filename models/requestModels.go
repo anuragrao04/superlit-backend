@@ -35,6 +35,10 @@ type SignInRequestEmail struct {
 	IsTeacher bool   `json:"isTeacher"` // true if the user is a teacher. Else, they are a student
 }
 
+type ForgotPasswordRequest struct {
+	UniversityID string `json:"universityID"`
+}
+
 type AddUserToClassroomRequest struct {
 	ClassroomCode string `json:"classroomCode"`
 	UserID        uint   `json:"userID"`

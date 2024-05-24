@@ -23,5 +23,6 @@ go.work
 # SQLite database file
 *.db
 
-# Env Files
+# Env Files & Keys
 *.env
+*.pem
