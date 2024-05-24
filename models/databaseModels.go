@@ -16,6 +16,7 @@ type User struct {
 	Classrooms   []Classroom `gorm:"many2many:user_classroom;"`
 }
 
+// aka class
 type Classroom struct {
 	gorm.Model
 	Name        string
