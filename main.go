@@ -5,13 +5,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+
 	"github.com/anuragrao04/superlit-backend/auth"
-	"github.com/anuragrao04/superlit-backend/classRoom"
+	"github.com/anuragrao04/superlit-backend/classroom"
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/tokens"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
