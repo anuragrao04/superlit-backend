@@ -19,7 +19,7 @@ func ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	link, email, err := tokens.CreateForgotLink(forgotPasswordRequest.UniversityID)
+	link, user, err := tokens.CreateForgotLink(forgotPasswordRequest.UniversityID)
 	if err != nil {
 		log.Println(err)
 		c.JSON(500, gin.H{"error": "Internal Server Error"})
@@ -27,7 +27,7 @@ func ForgotPassword(c *gin.Context) {
 	}
 
 	// now we send the email
-	go mailers.SendForgotPasswordEmail(link, email) // we trust you will send email. Errrors must be handled inside this function
+	go mailers.SendForgotPasswordEmail(link, user) // we trust you will send email. Errrors must be handled inside this function
 
 	// if everything went well, we send a success response
 	// 202 means that the request has been accepted for processing, but the processing has not been completed. (cases where the email sending screws up)

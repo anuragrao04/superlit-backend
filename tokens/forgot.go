@@ -14,10 +14,8 @@ import (
 
 var JWT_SECRET *ecdsa.PrivateKey
 
-func CreateForgotLink(universityID string) (link, email string, err error) {
+func CreateForgotLink(universityID string) (link string, user *models.User, err error) {
 	// first we see if there is a user with the given ID
-	user := &models.User{}
-
 	if database.DB == nil {
 		log.Println("DB is nil. Not connected to database")
 	}
@@ -25,7 +23,7 @@ func CreateForgotLink(universityID string) (link, email string, err error) {
 
 	// guard clause to get out if user does not exist
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return "", "", errors.New("User doesn't exist")
+		return "", nil, errors.New("User doesn't exist")
 	}
 
 	// user.Password is an encrypted version of the password.
@@ -44,7 +42,7 @@ func CreateForgotLink(universityID string) (link, email string, err error) {
 	signedToken, err := token.SignedString(JWT_SECRET)
 
 	if err != nil {
-		return "", "", err
+		return "", nil, err
 	}
 
 	FRONTEND_FORGOT_PASS_URL := os.Getenv("FRONTEND_FORGOT_PASS_URL")
@@ -54,7 +52,7 @@ func CreateForgotLink(universityID string) (link, email string, err error) {
 
 	link = FRONTEND_FORGOT_PASS_URL + signedToken
 
-	return link, user.Email, nil
+	return link, user, nil
 }
 
 func LoadECPrivateKey(pathToKeyFile string) error {

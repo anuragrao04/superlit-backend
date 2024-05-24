@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/anuragrao04/superlit-backend/models"
 	"gopkg.in/gomail.v2"
 )
 
@@ -14,7 +15,7 @@ import (
 // console and all
 // be emotional
 // users are dum but we're here to save the day!
-func SendForgotPasswordEmail(resetLink, email string) {
+func SendForgotPasswordEmail(resetLink string, user *models.User) {
 	OUR_EMAIL := os.Getenv("EMAILID")
 	OUR_PASSWORD := os.Getenv("EMAILPASSWORD")
 
@@ -25,12 +26,12 @@ func SendForgotPasswordEmail(resetLink, email string) {
 
 	message := gomail.NewMessage()
 	message.SetHeader("From", OUR_EMAIL)
-	message.SetHeader("To", email)
+	message.SetHeader("To", user.Email)
 	message.SetHeader("Subject", "Reset Your Password")
 	message.SetBody("text/html", fmt.Sprintf(`
 		<html>
 		<body>
-		<p>Dear User,</p>
+		<p>Dear %s</p>
 		<p>To reset your password, please click on the link below:</p>
 		<p><a href="%s">Reset Password</a></p>
 		<p>This link will expire in 15 minutes, so be sure to use it soon.</p>
@@ -39,7 +40,7 @@ func SendForgotPasswordEmail(resetLink, email string) {
 		<p>Superlit Team</p>
 		</body>
 		</html>
-	`, resetLink))
+	`, user.Name, resetLink))
 
 	dialer := gomail.NewDialer("smtp.gmail.com", 587, OUR_EMAIL, OUR_PASSWORD)
 
@@ -48,6 +49,6 @@ func SendForgotPasswordEmail(resetLink, email string) {
 		log.Println("failed to send email: ", err)
 	}
 
-	fmt.Println("Reset password email sent successfully to", email)
+	log.Println("Reset password email sent successfully to", user.Email)
 	return
 }
