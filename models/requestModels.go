@@ -39,6 +39,11 @@ type ForgotPasswordRequest struct {
 	UniversityID string `json:"universityID"`
 }
 
+type ResetPasswordRequest struct {
+	Token       string `json:"token"`
+	NewPassword string `json:"newPassword"`
+}
+
 type AddUserToClassroomRequest struct {
 	ClassroomCode string `json:"classroomCode"`
 	UserID        uint   `json:"userID"`

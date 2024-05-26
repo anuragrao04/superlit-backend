@@ -12,11 +12,6 @@ go mod tidy
 ```
 
 3. Populate the `.env` file. A template is provided in `.env.example`
-4. You have to generate a private key for the JWT web tokens. You can do this by executing the following command:
-
-```shell
-openssl ecparam -genkey -name prime256v1 -noout -out private_key.pem
-```
 
 Note: Everything in the `.env` file and the private key are a secret and are not supposed to be shared.
 

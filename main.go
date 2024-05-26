@@ -23,10 +23,12 @@ func main() {
 	godotenv.Load()
 
 	// load the JWT Secret Key
-	err := tokens.LoadECPrivateKey("private_key.pem")
+	err := tokens.LoadPrivateKey()
 	if err != nil {
 		log.Println(err)
 		log.Fatal("Error loading private key")
+	} else {
+		log.Println("Loaded JWT private key")
 	}
 
 	// connect to the database
@@ -52,6 +54,10 @@ func main() {
 	// this route is for users who've forgotten their password.
 	// It takes in University ID and sends a password reset link to their email
 	router.POST("/auth/forgotpassword", auth.ForgotPassword)
+
+	// this route is for users who have acquired their jwt token to reset the password
+	// It takes in the jwt token and new password and changes the password in the database
+	router.POST("/auth/resetpassword", auth.ResetPassword)
 
 	// this route is for creating a new classroom
 	router.POST("/classroom/create", classroom.CreateClassroom)

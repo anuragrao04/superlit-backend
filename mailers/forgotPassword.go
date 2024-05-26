@@ -45,8 +45,17 @@ func SendForgotPasswordEmail(resetLink string, user *models.User) {
 	dialer := gomail.NewDialer("smtp.gmail.com", 587, OUR_EMAIL, OUR_PASSWORD)
 
 	// Send the email
-	if err := dialer.DialAndSend(message); err != nil {
-		log.Println("failed to send email: ", err)
+	for i := 0; i < 3; i++ {
+		// retry up to 3 times
+		if err := dialer.DialAndSend(message); err != nil {
+			log.Println("attempt", i+1, "failed to send email: ", err)
+			if i == 2 {
+				// it failed on the last attempt. Try no more
+				return
+			}
+			continue
+		}
+		break
 	}
 
 	log.Println("Reset password email sent successfully to", user.Email)
