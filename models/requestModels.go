@@ -15,6 +15,14 @@ type SubmitRequest struct {
 	TestID   string `json:"testID"` // this will be the test ID of the test stored in the database
 }
 
+type CreateInstantTestRequest struct {
+	Questions []Question `json:"questions"`
+}
+
+type GetInstantTestRequest struct {
+	PublicCode string `json:"publicCode"`
+}
+
 type SignUpRequest struct {
 	UniversityID string `json:"universityID"`
 	Name         string `json:"name"`

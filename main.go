@@ -12,6 +12,7 @@ import (
 	"github.com/anuragrao04/superlit-backend/classroom"
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
+	"github.com/anuragrao04/superlit-backend/instantTest"
 	"github.com/anuragrao04/superlit-backend/tokens"
 )
 
@@ -64,6 +65,13 @@ func main() {
 
 	// add a user to a classroom. Regardless of if a user is a teacher or a student, they hit this route
 	router.POST("/classroom/adduser", classroom.AddUserToClassroom)
+
+	// INSTANT TEST STUFF
+	// Create an instant test
+	router.POST("/instanttest/create", instantTest.CreateTest)
+
+	// get test data. Used when starting a test
+	router.POST("/instanttest/get", instantTest.GetInstantTest)
 
 	s := &http.Server{
 		Addr:         ":6969",

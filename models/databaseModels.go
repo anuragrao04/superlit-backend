@@ -32,20 +32,34 @@ type Assignment struct {
 	Description string
 	StartTime   *time.Time
 	EndTime     *time.Time
-	Classrooms  []Classroom `gorm:"many2many:assignment_classroom;"`
-	Questions   []Question
-	Submissions []Submission
+	Classrooms  []Classroom  `gorm:"many2many:assignment_classroom;"`
+	Questions   []Question   `gorm:"foreignKey:AssignmentID"`
+	Submissions []Submission `gorm:"foreignKey:AssignmentID"`
+
 	// this is the classrooms in which the assignment is assigned.
 	// Since every classroom can have multiple assignments, and one assignment may be assigned to multiple classrooms, we have a many to many relationship
 }
 
+// Instant tests are tests that are created on the fly by teachers.
+// Private code is not shared. This code is used to edit the test
+// Public code is shared with students. This code is used to attempt the test
+type InstantTest struct {
+	gorm.Model
+	PrivateCode string
+	PublicCode  string
+	IsActive    bool
+	Questions   []Question   `gorm:"foreignKey:InstantTestID"`
+	Submissions []Submission `gorm:"foreignKey:InstantTestID"`
+}
+
 type Submission struct {
 	gorm.Model
-	AssignmentID uint
-	UserID       uint
-	User         User
-	Answers      []Answer
-	TotalScore   int
+	AssignmentID  uint
+	InstantTestID uint
+	UserID        uint
+	User          User
+	Answers       []Answer
+	TotalScore    int
 }
 
 type Answer struct {
@@ -61,17 +75,18 @@ type Answer struct {
 type Question struct {
 	gorm.Model
 	AssignmentID   uint
-	Title          string
-	Question       string
-	ExampleCases   []TestCase
-	PreWrittenCode string
-	TestCases      []TestCase
+	InstantTestID  uint
+	Title          string     `json:"title"`
+	Question       string     `json:"question"`
+	ExampleCases   []TestCase `json:"exampleCases"`
+	PreWrittenCode string     `json:"preWrittenCode"`
+	TestCases      []TestCase `json:"testCases"`
 }
 
 type TestCase struct {
 	gorm.Model
 	QuestionID     uint
-	Input          string
-	ExpectedOutput string
-	Score          int // score achieved by the student if the output matches the expected output
+	Input          string `'json:"input"`
+	ExpectedOutput string `json:"expectedOutput"`
+	Score          int    `json:"score"`
 }

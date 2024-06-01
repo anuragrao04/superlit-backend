@@ -10,7 +10,6 @@ import (
 )
 
 func CreateClassroom(Name string, TeacherID uint) (*models.Classroom, error) {
-
 	// first we make sure given TeacherID is a teacher
 	var teacher models.User
 	err := DB.First(&teacher, TeacherID).Error
