@@ -3,7 +3,6 @@ package mailers
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/anuragrao04/superlit-backend/models"
 	"gopkg.in/gomail.v2"
@@ -16,13 +15,6 @@ import (
 // be emotional
 // users are dum but we're here to save the day!
 func SendForgotPasswordEmail(resetLink string, user *models.User) {
-	OUR_EMAIL := os.Getenv("EMAILID")
-	OUR_PASSWORD := os.Getenv("EMAILPASSWORD")
-
-	if OUR_EMAIL == "" || OUR_PASSWORD == "" {
-		log.Println("email credentials are not set in environment variables")
-		return
-	}
 
 	message := gomail.NewMessage()
 	message.SetHeader("From", OUR_EMAIL)
@@ -42,12 +34,10 @@ func SendForgotPasswordEmail(resetLink string, user *models.User) {
 		</html>
 	`, user.Name, resetLink))
 
-	dialer := gomail.NewDialer("smtp.gmail.com", 587, OUR_EMAIL, OUR_PASSWORD)
-
 	// Send the email
 	for i := 0; i < 3; i++ {
 		// retry up to 3 times
-		if err := dialer.DialAndSend(message); err != nil {
+		if err := DIALER.DialAndSend(message); err != nil {
 			log.Println("attempt", i+1, "failed to send email: ", err)
 			if i == 2 {
 				// it failed on the last attempt. Try no more

@@ -48,39 +48,55 @@ type InstantTest struct {
 	PrivateCode string
 	PublicCode  string
 	IsActive    bool
-	Questions   []Question   `gorm:"foreignKey:InstantTestID"`
-	Submissions []Submission `gorm:"foreignKey:InstantTestID"`
+	Questions   []Question              `gorm:"foreignKey:InstantTestID"`
+	Submissions []InstantTestSubmission `gorm:"foreignKey:InstantTestID"`
 }
 
-type Submission struct {
+type InstantTestSubmission struct {
 	gorm.Model
-	AssignmentID  uint
 	InstantTestID uint
-	UserID        uint
-	User          User
+	UniversityID  string
 	Answers       []Answer
 	TotalScore    int
 }
 
+type Submission struct {
+	gorm.Model
+	AssignmentID uint
+	UserID       uint
+	User         User
+	Answers      []Answer
+	TotalScore   int
+}
+
 type Answer struct {
 	gorm.Model
-	SubmissionID    uint
-	QuestionID      uint
-	Question        Question
-	Code            string
-	TestCasesPassed []TestCase `gorm:"many2many:answer_testcases_passed;"`
-	Score           int        // total score for this particular question
+	SubmissionID            uint
+	InstantTestSubmissionID uint
+	QuestionID              uint
+	Code                    string
+	TestCases               []VerifiedTestCase
+	Score                   int // total score for this particular question
 }
 
 type Question struct {
 	gorm.Model
 	AssignmentID   uint
 	InstantTestID  uint
-	Title          string     `json:"title"`
-	Question       string     `json:"question"`
-	ExampleCases   []TestCase `json:"exampleCases"`
-	PreWrittenCode string     `json:"preWrittenCode"`
-	TestCases      []TestCase `json:"testCases"`
+	Title          string            `json:"title"`
+	Question       string            `json:"question"`
+	ExampleCases   []ExampleTestCase `json:"exampleCases"`
+	PreWrittenCode string            `json:"preWrittenCode"`
+	TestCases      []TestCase        `json:"testCases"`
+}
+
+type ExampleTestCase struct {
+	gorm.Model
+	QuestionID     uint
+	Input          string `'json:"input"`
+	ExpectedOutput string `json:"expectedOutput"`
+	Score          int    `json:"score"`
+	Explanation    string `json:"explanation"`
 }
 
 type TestCase struct {
@@ -89,4 +105,12 @@ type TestCase struct {
 	Input          string `'json:"input"`
 	ExpectedOutput string `json:"expectedOutput"`
 	Score          int    `json:"score"`
+}
+
+type VerifiedTestCase struct {
+	AnswerID       uint   `json:"answerID"`
+	Passed         bool   `json:"passed"`
+	Input          string `json:"input"`
+	ExpectedOutput string `json:"expectedOutput"`
+	ProducedOutput string `json:"producedOutput"`
 }

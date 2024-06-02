@@ -13,6 +13,7 @@ import (
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/instantTest"
+	"github.com/anuragrao04/superlit-backend/mailers"
 	"github.com/anuragrao04/superlit-backend/tokens"
 )
 
@@ -38,6 +39,14 @@ func main() {
 		log.Fatal(err)
 	} else {
 		log.Println("Connected to the database.")
+	}
+
+	// connect to the email server
+	err = mailers.Connect()
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("Connected to the email server.")
 	}
 
 	// These are the routes available. No other routes apart from these will be available. All routes must be defined here.
@@ -72,6 +81,12 @@ func main() {
 
 	// get test data. Used when starting a test
 	router.POST("/instanttest/get", instantTest.GetInstantTest)
+
+	// change active status of a test
+	router.POST("/instanttest/changeactive", instantTest.ChangeActive)
+
+	// submit a question from the instant test
+	router.POST("/instanttest/submit", instantTest.Submit)
 
 	s := &http.Server{
 		Addr:         ":6969",

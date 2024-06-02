@@ -30,54 +30,70 @@ func RunCode(c *gin.Context) {
 		return
 	}
 
+	output, err := GetOutput(runRequest.Code, runRequest.Input, runRequest.Language)
+	if err != nil {
+		if err.Error() == "Unsupported Language" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Unsupported Language"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"output": output})
+}
+
+// This function takes code, input and language => spits out the output string and error if any.
+// It's used by the above RunCode Function and other requests as well. This is a centralised function.
+// If you want to support more languages in the future, this is the function you want to modify.
+func GetOutput(code, input, language string) (string, error) {
+
 	// write the code to a file
-	codeFile, err := WriteCodeToFile(runRequest.Code, runRequest.Language)
+	codeFile, err := WriteCodeToFile(code, language)
 	defer os.Remove(codeFile)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return "", err
 	}
 
 	// now we need to handle the compilation different for different languages
 	// for now, we'll handle C and python. Other languages can be added later
 
 	// C
-	if runRequest.Language == "c" {
+	if language == "c" {
 		// compile the code
-		compiledBinary, err := CompileBinary(codeFile, runRequest.Language)
+		compiledBinary, err := CompileBinary(codeFile, language)
 		if err != nil {
 			// if the error is due to client code problem, we need to send the error to the client
 			if err.Error() == "Client Code Problem" {
-				c.JSON(http.StatusOK, gin.H{"output": compiledBinary})
-				return
+				// In this case, the variable 'compiledBinary' contains the compilation error string
+				return compiledBinary, nil
 			}
 
 			log.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			return err.Error(), err
 		}
 
 		// run the binary
-		output := RunBinary(runRequest.Input, compiledBinary)
+		output := RunBinary(input, compiledBinary)
 
 		// we clean up the files
 		os.Remove(compiledBinary)
 
 		// send the output back
-		c.JSON(http.StatusOK, gin.H{"output": output})
+		return output, nil
 
-	} else if runRequest.Language == "py" {
-		output := RunBinary(runRequest.Input, "python", codeFile)
+	} else if language == "py" {
+		output := RunBinary(input, "python", codeFile)
 
 		// we clean up the file
 		os.Remove(codeFile)
 		// send the output back
-		c.JSON(http.StatusOK, gin.H{"output": output})
+		return output, nil
 	} else {
-		c.Status(http.StatusTeapot)
-		return
+		return "", errors.New("Unsupported Language")
 	}
+
 }
 
 // the below function is responsible for writing code to a file

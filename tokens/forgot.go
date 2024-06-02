@@ -29,7 +29,7 @@ func CreateForgotLink(universityID string) (link string, user *models.User, err 
 	// user.Password is an encrypted version of the password.
 	// we make a unique signing key for each user with current password
 	uniqueKey := []byte(string(JWT_SECRET) + user.Password)
-	log.Println("Signing with ", string(uniqueKey))
+	// log.Println("Signing with ", string(uniqueKey))
 
 	// this way, when the user later changes his password, the token is automatically invalidated.
 	// This is because the password is part of the key used to sign the token.
