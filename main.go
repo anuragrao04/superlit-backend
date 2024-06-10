@@ -88,6 +88,9 @@ func main() {
 	// submit a question from the instant test
 	router.POST("/instanttest/submit", instantTest.Submit)
 
+	// get submissions for an instant test
+	router.POST("/instanttest/getsubmissions", instantTest.GetSubmissions)
+
 	s := &http.Server{
 		Addr:         ":6969",
 		Handler:      router,

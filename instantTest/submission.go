@@ -1,7 +1,6 @@
 package instantTest
 
 import (
-	"log"
 	"strings"
 
 	"github.com/anuragrao04/superlit-backend/compile"
@@ -80,8 +79,6 @@ func CalculateScore(question models.Question, code, language string) (int, []mod
 				ProducedOutput: output,
 			})
 		} else {
-			log.Println("Expected: ", exampleCase.ExpectedOutput)
-			log.Println("Got: ", output)
 			testCasesFailed = append(testCasesFailed, models.VerifiedTestCase{
 				Passed:         false,
 				Input:          exampleCase.Input,

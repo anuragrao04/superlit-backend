@@ -86,7 +86,7 @@ func UpsertSubmissionAndAnswers(instantTestID uint, universityID string, newAnsw
 	return DB.Transaction(func(tx *gorm.DB) error {
 		// Find existing submission
 		var submission models.InstantTestSubmission
-		err := tx.Where("instant_test_id = ? AND university_id = ?", instantTestID, universityID).First(&submission).Error
+		err := tx.Preload("Answers").Preload("Answers.TestCases").Where("instant_test_id = ? AND university_id = ?", instantTestID, universityID).First(&submission).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err // Error other than record not found
 		}
@@ -104,16 +104,24 @@ func UpsertSubmissionAndAnswers(instantTestID uint, universityID string, newAnsw
 			}
 		} else {
 			// Submission exists. Now we look if an answer already exists for this question
-
 			answerExists := false
-			for i, existingAnswer := range submission.Answers {
+
+			for _, existingAnswer := range submission.Answers {
+
 				if existingAnswer.QuestionID == newAnswer.QuestionID {
+					log.Println("Answer exists")
 					// Update existing answer
 
 					submission.TotalScore -= existingAnswer.Score // Subtract old score
 					submission.TotalScore += newAnswer.Score      // Add new score
+					// update the above in the database
+					tx.Model(&submission).Where("id = ?", submission.ID).Update("total_score", submission.TotalScore)
 
-					submission.Answers[i] = newAnswer // Replace the old answer
+					// Replace the old answer
+					tx.Model(&submission).Association("Answers").Delete(existingAnswer)
+					tx.Model(&submission).Association("Answers").Append(&newAnswer)
+
+					prettyPrint.PrettyPrint(submission)
 					answerExists = true
 					// maybe in the future we'll be nice to the students and store the answer depending on which one scored higher
 					// if the old score is better than new score, no updating
@@ -134,4 +142,22 @@ func UpsertSubmissionAndAnswers(instantTestID uint, universityID string, newAnsw
 
 		return nil
 	})
+}
+
+// This function fetches all submissions in a given instant test and returns it as an array
+// it also returns an array of questionIDs and a boolean stating if the test is active
+func GetInstantTestSubmissions(privateCode string) ([]models.InstantTestSubmission, []uint, bool, error) {
+	var test models.InstantTest
+	err := DB.Preload("Submissions").Preload("Questions").Preload("Submissions.Answers").Where("private_code = ?", privateCode).First(&test).Error
+	if err != nil {
+		log.Println("Failed to get test: ", err)
+		return nil, nil, false, err
+	}
+
+	var questionIDs []uint
+	for _, question := range test.Questions {
+		questionIDs = append(questionIDs, question.ID)
+	}
+
+	return test.Submissions, questionIDs, test.IsActive, nil
 }

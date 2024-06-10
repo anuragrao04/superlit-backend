@@ -23,6 +23,10 @@ type InstantTestSubmitRequest struct {
 	QuestionID   uint   `json:"questionID"`
 }
 
+type InstantTestGetSubmissionsRequest struct {
+	PrivateCode string `json:"privateCode"`
+}
+
 type CreateInstantTestRequest struct {
 	Questions []Question `json:"questions"`
 	Email     string     `json:"email"`
