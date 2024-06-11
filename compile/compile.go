@@ -5,12 +5,14 @@ package compile
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -172,12 +174,20 @@ func CompileBinary(file string, language string) (compiledBinary string, err err
 // 2. input: the input to be given to the program
 // returns:
 // output: the output of the binary including stdout and stderror
+
 func RunBinary(input string, command ...string) string {
-	cmd := exec.Command(command[0], command[1:]...)
+	environment := os.Getenv("ENVIRONMENT")
+	if environment == "PROD" {
+		command = append([]string{"firejail", "--quiet", "--profile=superlit"}, command...)
+	} // else no firejail
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, command[0], command[1:]...)
 	cmd.Stdin = strings.NewReader(input)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
-	cmd.Run()
-	return out.String()
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "Timed Out! Make sure there aren't any infinite loops in your program"
+	}
+	return string(output)
 }
