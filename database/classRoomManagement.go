@@ -12,6 +12,9 @@ import (
 func CreateClassroom(Name string, TeacherID uint) (*models.Classroom, error) {
 	// first we make sure given TeacherID is a teacher
 	var teacher models.User
+
+	DBLock.Lock()
+	defer DBLock.Unlock()
 	err := DB.First(&teacher, TeacherID).Error
 	if err != nil {
 		return nil, errors.New("teacher not found")
@@ -39,6 +42,9 @@ func AddUserToClassroom(UserID uint, ClassroomCode string, IsTeacher bool) error
 	var user models.User
 	var classroom models.Classroom
 
+	DBLock.Lock()
+	defer DBLock.Unlock()
+
 	if err := DB.First(&user, UserID).Error; err != nil {
 		return errors.New("user not found")
 	}
@@ -56,6 +62,8 @@ func AddUserToClassroom(UserID uint, ClassroomCode string, IsTeacher bool) error
 	return nil
 }
 
+// this function is only used by the CreateClassroom function
+// The database is already locked there. So we shouldn't attempt to acquire the mutex here
 func generateUniqueCode() string {
 	for {
 		code := generateRandomCode()

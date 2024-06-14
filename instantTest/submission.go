@@ -19,6 +19,8 @@ func Submit(c *gin.Context) {
 
 	// now we fetch the Test from the database
 	test := models.InstantTest{}
+	database.DBLock.Lock()
+	defer database.DBLock.Unlock()
 	database.DB.Preload("Questions").Preload("Questions.ExampleCases").Preload("Questions.TestCases").Where("public_code = ?", submitRequest.PublicCode).First(&test)
 
 	// now we test the submission against both exampleCases and testCases

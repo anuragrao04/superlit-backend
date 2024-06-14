@@ -19,6 +19,8 @@ func CreateForgotLink(universityID string) (link string, user *models.User, err 
 	if database.DB == nil {
 		log.Println("DB is nil. Not connected to database")
 	}
+	database.DBLock.Lock()
+	defer database.DBLock.Unlock()
 	err = database.DB.Where("university_id = ?", universityID).First(&user).Error
 
 	// guard clause to get out if user does not exist
@@ -75,6 +77,8 @@ func ResetPassword(tokenString, newPassword string) error {
 
 		// check if the user exists
 		var user models.User
+		database.DBLock.Lock()
+		defer database.DBLock.Unlock()
 		err := database.DB.Where("id = ?", token.Claims.(jwt.MapClaims)["userID"]).First(&user).Error
 		if err != nil {
 			return nil, errors.New("User not found")

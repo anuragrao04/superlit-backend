@@ -8,6 +8,8 @@ import (
 	"log"
 )
 
+// this function is only used by CreateInstantTest()
+// The database mutex is already locked in that function. We shouldn't attempt to lock it here again
 func generateUniqueCodes() (privateCode, publicCode string) {
 	for {
 		privateCode := generateRandomCode()
@@ -34,6 +36,9 @@ func CreateInstantTest(questions []models.Question) (privateCode, publicCode str
 	newTest.Questions = questions
 	newTest.IsActive = true
 
+	DBLock.Lock()
+	defer DBLock.Unlock()
+
 	err = DB.Create(&newTest).Error
 	prettyPrint.PrettyPrint(newTest)
 
@@ -49,6 +54,10 @@ func GetInstantTest(publicCode string) (questions []models.Question, isActive bo
 	if DB == nil {
 		log.Fatal("Not Connected to Database")
 	}
+
+	DBLock.Lock()
+	defer DBLock.Unlock()
+
 	err = DB.Preload("Questions").Preload("Questions.ExampleCases").Where("public_code = ?", publicCode).First(&test).Error
 	if err != nil {
 		log.Println("Failed to get test: ", err)
@@ -68,6 +77,9 @@ func ChangeActiveStatusInstantTest(active bool, privateCode string) (err error) 
 	if DB == nil {
 		log.Fatal("Not Connected to Database")
 	}
+
+	DBLock.Lock()
+	defer DBLock.Unlock()
 	result := DB.Model(&models.InstantTest{}).Where("private_code = ?", privateCode).Update("is_active", active)
 	if result.Error != nil {
 		log.Println("Failed to change active status: ", err)
@@ -82,7 +94,8 @@ func ChangeActiveStatusInstantTest(active bool, privateCode string) (err error) 
 func UpsertSubmissionAndAnswers(instantTestID uint, universityID string, newAnswer models.Answer) error {
 	// this creates a transaction. If any error occurs in any step, the entire transaction is rolled back
 	// this ensures updating the submission and the answers is atomic
-
+	DBLock.Lock()
+	defer DBLock.Unlock()
 	return DB.Transaction(func(tx *gorm.DB) error {
 		// Find existing submission
 		var submission models.InstantTestSubmission
@@ -148,6 +161,9 @@ func UpsertSubmissionAndAnswers(instantTestID uint, universityID string, newAnsw
 // it also returns an array of questionIDs and a boolean stating if the test is active
 func GetInstantTestSubmissions(privateCode string) ([]models.InstantTestSubmission, []uint, bool, error) {
 	var test models.InstantTest
+
+	DBLock.Lock()
+	defer DBLock.Unlock()
 	err := DB.Preload("Submissions").Preload("Questions").Preload("Submissions.Answers").Where("private_code = ?", privateCode).First(&test).Error
 	if err != nil {
 		log.Println("Failed to get test: ", err)
