@@ -187,7 +187,10 @@ func RunBinary(input string, command ...string) string {
 	cmd.Stdin = strings.NewReader(input)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "Timed Out! Make sure there aren't any infinite loops in your program"
+		if err.Error() == "signal: killed" {
+			return "Timed Out! Make sure there aren't any infinite loops in your program"
+		}
+		return err.Error()
 	}
 	return string(output)
 }
