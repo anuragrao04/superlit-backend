@@ -3,38 +3,41 @@ package models
 import (
 	"time"
 
+	"database/sql/driver"
+	"errors"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type User struct {
 	gorm.Model
-	UniversityID string // this may be employee ID or student ID (EMP ID and SRN in terms of PES)
-	Name         string
-	Email        string
-	Password     string
-	IsTeacher    bool
-	Classrooms   []Classroom `gorm:"many2many:user_classroom;"`
+	UniversityID string      `json:"universityID"` // this may be employee ID or student ID (EMP ID and SRN in terms of PES)
+	Name         string      `json:"name"`
+	Email        string      `json:"email"`
+	Password     string      `json:"password"`
+	IsTeacher    bool        `json:"isTeacher"`
+	Classrooms   []Classroom `gorm:"many2many:user_classroom;" json:"classrooms"`
 }
 
 // aka class
 type Classroom struct {
 	gorm.Model
-	Name        string
-	Code        string       // this is the code that students will use to join the classroom
-	Users       []User       `gorm:"many2many:user_classroom;"`
-	Assignments []Assignment `gorm:"many2many:assignment_classroom;"`
+	Name        string       `json:"name"`
+	Code        string       `json:"code"` // this is the code that students will use to join the classroom
+	Users       []User       `json:"users" gorm:"many2many:user_classroom;"`
+	Assignments []Assignment `json:"assignments" gorm:"many2many:assignment_classroom;"`
 }
 
 // aka test
 type Assignment struct {
 	gorm.Model
-	Name        string
-	Description string
-	StartTime   *time.Time
-	EndTime     *time.Time
-	Classrooms  []Classroom  `gorm:"many2many:assignment_classroom;"`
-	Questions   []Question   `gorm:"foreignKey:AssignmentID"`
-	Submissions []Submission `gorm:"foreignKey:AssignmentID"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	StartTime   *time.Time   `json:"startTime"`
+	EndTime     *time.Time   `json:"endTime"`
+	Classrooms  []Classroom  `gorm:"many2many:assignment_classroom;" json:"classrooms"`
+	Questions   []Question   `gorm:"foreignKey:AssignmentID" json:"questions"`
+	Submissions []Submission `gorm:"foreignKey:AssignmentID" json:"submissions"`
 
 	// this is the classrooms in which the assignment is assigned.
 	// Since every classroom can have multiple assignments, and one assignment may be assigned to multiple classrooms, we have a many to many relationship
@@ -45,55 +48,79 @@ type Assignment struct {
 // Public code is shared with students. This code is used to attempt the test
 type InstantTest struct {
 	gorm.Model
-	PrivateCode string
-	PublicCode  string
-	IsActive    bool
-	Questions   []Question              `gorm:"foreignKey:InstantTestID"`
-	Submissions []InstantTestSubmission `gorm:"foreignKey:InstantTestID"`
+	PrivateCode string                  `json:"privateCode"`
+	PublicCode  string                  `json:"publicCode"`
+	IsActive    bool                    `json:"isActive"`
+	Questions   []Question              `gorm:"foreignKey:InstantTestID" json:"questions"`
+	Submissions []InstantTestSubmission `gorm:"foreignKey:InstantTestID" json:"submissions"`
 }
 
 type InstantTestSubmission struct {
 	gorm.Model
-	InstantTestID uint
-	UniversityID  string
-	Answers       []Answer
-	TotalScore    int
+	InstantTestID uint     `json:"instantTestID"`
+	UniversityID  string   `json:"universityID"`
+	Answers       []Answer `json:"answers"`
+	TotalScore    int      `json:"totalScore"`
 }
 
 type Submission struct {
 	gorm.Model
-	AssignmentID uint
-	UserID       uint
-	User         User
-	Answers      []Answer
-	TotalScore   int
+	AssignmentID uint     `json:"assignmentID"`
+	UserID       uint     `json:"userID"`
+	User         User     `json:"user"`
+	Answers      []Answer `json:"answers"`
+	TotalScore   int      `json:"totalScore"`
 }
 
 type Answer struct {
 	gorm.Model
-	SubmissionID            uint
-	InstantTestSubmissionID uint
-	QuestionID              uint
-	Code                    string
-	TestCases               []VerifiedTestCase
-	Score                   int // total score for this particular question
+	SubmissionID            uint               `json:"submissionID"`
+	InstantTestSubmissionID uint               `json:"instantTestSubmissionID"`
+	QuestionID              uint               `json:"questionID"`
+	Code                    string             `json:"code"`
+	TestCases               []VerifiedTestCase `json:"testCases"`
+	Score                   int                `json:"score"`      // total score for this particular question
+	AIVerified              bool               `json:"AIVerified"` // if AI has verified the code
+	AIVerdict               bool               `json:"AIVerdict"`  // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
+}
+
+// The below gymnastics is because GORM doesn't support storing []string directly.
+// So we have to implement the Scanner and Valuer interfaces to convert the []string to a varchar and back
+
+type Constraints []string
+
+func (c *Constraints) Scan(src any) error {
+	bytes, ok := src.([]byte)
+	if !ok {
+		return errors.New("src value cannot cast to []byte")
+	}
+	*c = strings.Split(string(bytes), ",")
+	return nil
+}
+
+func (c Constraints) Value() (driver.Value, error) {
+	if len(c) == 0 {
+		return nil, nil
+	}
+	return strings.Join(c, ","), nil
 }
 
 type Question struct {
 	gorm.Model
-	AssignmentID   uint
-	InstantTestID  uint
+	AssignmentID   uint              `json:"assignmentID"`
+	InstantTestID  uint              `json:"instantTestID"`
 	Title          string            `json:"title"`
 	Question       string            `json:"question"`
 	ExampleCases   []ExampleTestCase `json:"exampleCases"`
 	PreWrittenCode string            `json:"preWrittenCode"`
 	TestCases      []TestCase        `json:"testCases"`
+	Constraints    Constraints       `json:"constraints" gorm:"type:VARCHAR(255)"` // list of constraints that the code must satisfy. Used for AI Verification
 }
 
 type ExampleTestCase struct {
 	gorm.Model
-	QuestionID     uint
-	Input          string `'json:"input"`
+	QuestionID     uint   `json:"questionID"`
+	Input          string `json:"input"`
 	ExpectedOutput string `json:"expectedOutput"`
 	Score          int    `json:"score"`
 	Explanation    string `json:"explanation"`
@@ -101,7 +128,7 @@ type ExampleTestCase struct {
 
 type TestCase struct {
 	gorm.Model
-	QuestionID     uint
+	QuestionID     uint   `json:"questionID"`
 	Input          string `'json:"input"`
 	ExpectedOutput string `json:"expectedOutput"`
 	Score          int    `json:"score"`

@@ -80,3 +80,8 @@ type CreateClassroomRequest struct {
 	Name      string `json:"name"`
 	TeacherID uint   `json:"teacherID"`
 }
+
+// AI Stuff
+type AIVerifyConstraintsInstantTestRequest struct {
+	InstantTestID uint `json:"instantTestID"` // Used for AI Verification
+}
