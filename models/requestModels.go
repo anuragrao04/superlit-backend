@@ -83,5 +83,12 @@ type CreateClassroomRequest struct {
 
 // AI Stuff
 type AIVerifyConstraintsInstantTestRequest struct {
-	InstantTestID uint `json:"instantTestID"` // Used for AI Verification
+	PrivateCode string `json:"privateCode"`
+}
+
+// Google Sheets Stuff
+
+type PopulateGoogleSheetInstantTestSubmissionsRequest struct {
+	PrivateCode     string `json:"privateCode"`
+	GoogleSheetLink string `json:"googleSheetLink"`
 }

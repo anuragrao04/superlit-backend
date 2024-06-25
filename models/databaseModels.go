@@ -3,10 +3,8 @@ package models
 import (
 	"time"
 
-	"database/sql/driver"
-	"errors"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type User struct {
@@ -48,6 +46,7 @@ type Assignment struct {
 // Public code is shared with students. This code is used to attempt the test
 type InstantTest struct {
 	gorm.Model
+	Email       string                  `json:"email"`
 	PrivateCode string                  `json:"privateCode"`
 	PublicCode  string                  `json:"publicCode"`
 	IsActive    bool                    `json:"isActive"`
@@ -87,24 +86,6 @@ type Answer struct {
 // The below gymnastics is because GORM doesn't support storing []string directly.
 // So we have to implement the Scanner and Valuer interfaces to convert the []string to a varchar and back
 
-type Constraints []string
-
-func (c *Constraints) Scan(src any) error {
-	bytes, ok := src.([]byte)
-	if !ok {
-		return errors.New("src value cannot cast to []byte")
-	}
-	*c = strings.Split(string(bytes), ",")
-	return nil
-}
-
-func (c Constraints) Value() (driver.Value, error) {
-	if len(c) == 0 {
-		return nil, nil
-	}
-	return strings.Join(c, ","), nil
-}
-
 type Question struct {
 	gorm.Model
 	AssignmentID   uint              `json:"assignmentID"`
@@ -114,7 +95,8 @@ type Question struct {
 	ExampleCases   []ExampleTestCase `json:"exampleCases"`
 	PreWrittenCode string            `json:"preWrittenCode"`
 	TestCases      []TestCase        `json:"testCases"`
-	Constraints    Constraints       `json:"constraints" gorm:"type:VARCHAR(255)"` // list of constraints that the code must satisfy. Used for AI Verification
+	Constraints    pq.StringArray    `json:"constraints" gorm:"type:text[]"` // list of constraints that the code must satisfy. Used for AI Verification
+	Languages      pq.StringArray    `json:"languages" gorm:"type:text[]"`   // languages the student is allowed to submit in
 }
 
 type ExampleTestCase struct {

@@ -21,7 +21,7 @@ func CreateTest(c *gin.Context) {
 
 	// prettyPrint.PrettyPrint(testRequest.Questions)
 
-	privateCode, publicCode, err := database.CreateInstantTest(testRequest.Questions)
+	privateCode, publicCode, err := database.CreateInstantTest(testRequest.Questions, testRequest.Email)
 
 	if err != nil {
 		c.JSON(500, gin.H{"error": "Failed to create test"})

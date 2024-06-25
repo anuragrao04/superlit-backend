@@ -8,10 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
+	"github.com/anuragrao04/superlit-backend/AI"
 	"github.com/anuragrao04/superlit-backend/auth"
 	"github.com/anuragrao04/superlit-backend/classroom"
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
+	"github.com/anuragrao04/superlit-backend/googleSheets"
 	"github.com/anuragrao04/superlit-backend/instantTest"
 	"github.com/anuragrao04/superlit-backend/mailers"
 	"github.com/anuragrao04/superlit-backend/tokens"
@@ -39,6 +41,14 @@ func main() {
 		log.Fatal(err)
 	} else {
 		log.Println("Connected to the database.")
+	}
+
+	// connect to google sheets api
+	err = googleSheets.Connect()
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		log.Println("Connected to Google Sheets API.")
 	}
 
 	// connect to the email server
@@ -90,6 +100,12 @@ func main() {
 
 	// get submissions for an instant test
 	router.POST("/instanttest/getsubmissions", instantTest.GetSubmissions)
+
+	// AI Verification of instant test
+	router.POST("/instanttest/aiverify", AI.AIVerifyConstraintsInstantTest)
+
+	// Populate google sheet with instant test submission data
+	router.POST("/instanttest/populategooglesheet", googleSheets.PopulateGoogleSheetInstantTest)
 
 	s := &http.Server{
 		Addr:         ":6969",

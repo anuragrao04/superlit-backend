@@ -27,13 +27,14 @@ func generateUniqueCodes() (privateCode, publicCode string) {
 	}
 }
 
-func CreateInstantTest(questions []models.Question) (privateCode, publicCode string, err error) {
+func CreateInstantTest(questions []models.Question, email string) (privateCode, publicCode string, err error) {
 	// we assign a private and a public key to this test
 	privateCode, publicCode = generateUniqueCodes()
 	var newTest models.InstantTest
 	newTest.PrivateCode = privateCode
 	newTest.PublicCode = publicCode
 	newTest.Questions = questions
+	newTest.Email = email
 	newTest.IsActive = true
 
 	DBLock.Lock()
@@ -176,4 +177,22 @@ func GetInstantTestSubmissions(privateCode string) ([]models.InstantTestSubmissi
 	}
 
 	return test.Submissions, questionIDs, test.IsActive, nil
+}
+
+func GetInstantTestByPrivateCode(privateCode string) (models.InstantTest, error) {
+	var test models.InstantTest
+	DBLock.Lock()
+	defer DBLock.Unlock()
+	err := DB.Preload("Questions").Preload("Questions").Preload("Submissions").Preload("Submissions.Answers").Where("private_code = ?", privateCode).First(&test).Error
+	if err != nil {
+		log.Println("Failed to get test: ", err)
+		return models.InstantTest{}, err
+	}
+	return test, nil
+}
+
+func SaveInstantTest(instantTest models.InstantTest) error {
+	err := DB.Session(&gorm.Session{FullSaveAssociations: true}).Save(&instantTest).Error
+	log.Println("Saved to db")
+	return err
 }
