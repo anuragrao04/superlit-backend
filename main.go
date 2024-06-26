@@ -79,11 +79,15 @@ func main() {
 	// It takes in the jwt token and new password and changes the password in the database
 	router.POST("/auth/resetpassword", auth.ResetPassword)
 
+	// this route is used once signed in
+	// to get basic user details from token
+	router.GET("/auth/getuser", tokens.VerifyToken, auth.GetUserFromToken)
+
 	// this route is for creating a new classroom
-	router.POST("/classroom/create", classroom.CreateClassroom)
+	router.POST("/classroom/create", tokens.VerifyToken, classroom.CreateClassroom)
 
 	// add a user to a classroom. Regardless of if a user is a teacher or a student, they hit this route
-	router.POST("/classroom/adduser", classroom.AddUserToClassroom)
+	router.POST("/classroom/adduser", tokens.VerifyToken, classroom.AddUserToClassroom)
 
 	// INSTANT TEST STUFF
 	// Create an instant test

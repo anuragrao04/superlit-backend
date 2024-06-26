@@ -52,7 +52,6 @@ type SignUpRequest struct {
 type SignInRequestUniversityID struct {
 	UniversityID string `json:"universityID"`
 	Password     string `json:"password"`
-	IsTeacher    bool   `json:"isTeacher"` // true if the user is a teacher. Else, they are a student
 }
 
 type SignInRequestEmail struct {
@@ -72,13 +71,10 @@ type ResetPasswordRequest struct {
 
 type AddUserToClassroomRequest struct {
 	ClassroomCode string `json:"classroomCode"`
-	UserID        uint   `json:"userID"`
-	IsTeacher     bool   `json:"isTeacher"`
 }
 
 type CreateClassroomRequest struct {
-	Name      string `json:"name"`
-	TeacherID uint   `json:"teacherID"`
+	Name string `json:"name"`
 }
 
 // AI Stuff

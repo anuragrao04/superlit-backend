@@ -6,6 +6,7 @@ import (
 
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
+	"github.com/anuragrao04/superlit-backend/tokens"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,5 +28,7 @@ func SignInWithUniversityID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &user)
+	token, err := tokens.CreateSignInToken(user.ID, user.UniversityID, user.IsTeacher, user.Name, user.Email)
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }

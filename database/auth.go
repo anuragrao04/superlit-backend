@@ -35,3 +35,13 @@ func GetUserByUniversityIDPassword(UniversityID string, Password string) (user m
 	}
 	return user, err
 }
+
+func GetUserByID(userID uint) (user models.User, err error) {
+	DBLock.Lock()
+	defer DBLock.Unlock()
+	err = DB.Preload("Classrooms").Where("id = ?", userID).First(&user).Error
+	if err != nil {
+		log.Println(err)
+	}
+	return user, err
+}
