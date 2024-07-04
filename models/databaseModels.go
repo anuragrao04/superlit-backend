@@ -31,8 +31,8 @@ type Assignment struct {
 	gorm.Model
 	Name        string       `json:"name"`
 	Description string       `json:"description"`
-	StartTime   *time.Time   `json:"startTime"`
-	EndTime     *time.Time   `json:"endTime"`
+	StartTime   time.Time    `json:"startTime"`
+	EndTime     time.Time    `json:"endTime"`
 	Classrooms  []Classroom  `gorm:"many2many:assignment_classroom;" json:"classrooms"`
 	Questions   []Question   `gorm:"foreignKey:AssignmentID" json:"questions"`
 	Submissions []Submission `gorm:"foreignKey:AssignmentID" json:"submissions"`

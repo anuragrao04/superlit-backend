@@ -83,3 +83,23 @@ func generateRandomCode() string {
 	code := rand.Intn(900000) + 100000 // Generates a number between 100000 and 999999
 	return strconv.Itoa(code)
 }
+
+func GetClassroom(ClassroomCode string) (*models.Classroom, error) {
+	var classroom models.Classroom
+	DBLock.Lock()
+	defer DBLock.Unlock()
+	if err := DB.Preload("Users").Preload("Assignments").Where("code = ?", ClassroomCode).First(&classroom).Error; err != nil {
+		return nil, errors.New("classroom not found")
+	}
+	return &classroom, nil
+}
+
+func GetClassroomByID(classroomID uint) (*models.Classroom, error) {
+	var classroom models.Classroom
+	DBLock.Lock()
+	defer DBLock.Unlock()
+	if err := DB.First(&classroom, classroomID).Error; err != nil {
+		return nil, errors.New("classroom not found")
+	}
+	return &classroom, nil
+}

@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/anuragrao04/superlit-backend/AI"
+	"github.com/anuragrao04/superlit-backend/assignments"
 	"github.com/anuragrao04/superlit-backend/auth"
 	"github.com/anuragrao04/superlit-backend/classroom"
 	"github.com/anuragrao04/superlit-backend/compile"
@@ -88,6 +89,11 @@ func main() {
 
 	// add a user to a classroom. Regardless of if a user is a teacher or a student, they hit this route
 	router.POST("/classroom/adduser", tokens.VerifyToken, classroom.AddUserToClassroom)
+
+	// list assignments of a particular classroom
+	router.POST("/assignment/listassignments", tokens.VerifyToken, classroom.ListAssignments)
+
+	router.POST("/assignment/createassignment", tokens.VerifyToken, assignments.CreateAssignment)
 
 	// INSTANT TEST STUFF
 	// Create an instant test

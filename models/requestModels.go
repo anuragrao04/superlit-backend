@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // INCOMING REQUEST MODELS
 
 // this is the request for /run. It only runs the given code and sends the output back
@@ -75,6 +77,19 @@ type AddUserToClassroomRequest struct {
 
 type CreateClassroomRequest struct {
 	Name string `json:"name"`
+}
+
+type ListAssignmentsRequest struct {
+	ClassroomCode string `json:"classroomCode"`
+}
+
+type CreateAssignmentRequest struct {
+	Name         string     `json:"name"`
+	Description  string     `json:"description"`
+	Questions    []Question `json:"questions"`
+	ClassroomIDs []uint     `json:"classroomIDs"` // IDs of the classroom the assignment is to be assigned to
+	StartTime    time.Time  `json:"startTime"`    // start time of the assignment
+	EndTime      time.Time  `json:"endTime"`      // end time of the assignment
 }
 
 // AI Stuff

@@ -30,5 +30,5 @@ func SignInWithUniversityID(c *gin.Context) {
 
 	token, err := tokens.CreateSignInToken(user.ID, user.UniversityID, user.IsTeacher, user.Name, user.Email)
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{"token": token, "isTeacher": user.IsTeacher})
 }
