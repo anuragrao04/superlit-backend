@@ -8,7 +8,7 @@ import (
 
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
-	"github.com/anuragrao04/superlit-backend/prettyPrint"
+	// "github.com/anuragrao04/superlit-backend/prettyPrint"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/sheets/v4"
 )
@@ -105,7 +105,7 @@ func PopulateGoogleSheetInstantTest(c *gin.Context) {
 	}
 
 	lastColumnLetter := columnIndexToLetter(len(headRow))
-	prettyPrint.PrettyPrint(valuesToInsert)
+	// prettyPrint.PrettyPrint(valuesToInsert)
 
 	updateRange := fmt.Sprintf("%s!A1:%s%d", newSheetTitle, lastColumnLetter, len(valuesToInsert))
 

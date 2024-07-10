@@ -177,9 +177,11 @@ func CompileBinary(file string, language string) (compiledBinary string, err err
 
 func RunBinary(input string, command ...string) string {
 	environment := os.Getenv("ENVIRONMENT")
+
 	if environment == "PROD" {
 		command = append([]string{"firejail", "--quiet", "--profile=superlit"}, command...)
 	} // else no firejail
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

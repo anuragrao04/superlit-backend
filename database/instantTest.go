@@ -3,7 +3,7 @@ package database
 import (
 	"errors"
 	"github.com/anuragrao04/superlit-backend/models"
-	"github.com/anuragrao04/superlit-backend/prettyPrint"
+	// "github.com/anuragrao04/superlit-backend/prettyPrint"
 	"gorm.io/gorm"
 	"log"
 )
@@ -41,7 +41,7 @@ func CreateInstantTest(questions []models.Question, email string) (privateCode, 
 	defer DBLock.Unlock()
 
 	err = DB.Create(&newTest).Error
-	prettyPrint.PrettyPrint(newTest)
+	// prettyPrint.PrettyPrint(newTest)
 
 	if err != nil {
 		log.Println("Failed to create test: ", err)
@@ -135,7 +135,7 @@ func UpsertSubmissionAndAnswers(instantTestID uint, universityID string, newAnsw
 					tx.Model(&submission).Association("Answers").Delete(existingAnswer)
 					tx.Model(&submission).Association("Answers").Append(&newAnswer)
 
-					prettyPrint.PrettyPrint(submission)
+					// prettyPrint.PrettyPrint(submission)
 					answerExists = true
 					// maybe in the future we'll be nice to the students and store the answer depending on which one scored higher
 					// if the old score is better than new score, no updating

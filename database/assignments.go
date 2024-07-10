@@ -4,7 +4,7 @@ import (
 	// "errors"
 
 	"github.com/anuragrao04/superlit-backend/models"
-	"github.com/anuragrao04/superlit-backend/prettyPrint"
+	// "github.com/anuragrao04/superlit-backend/prettyPrint"
 )
 
 func AddAssignmentToClassroom(assignment *models.Assignment, classroom *models.Classroom) error {
@@ -19,6 +19,6 @@ func AddAssignmentToClassroom(assignment *models.Assignment, classroom *models.C
 	// So, I can't check for errors.
 	// I have to assume that it worked.
 
-	prettyPrint.PrettyPrint(result)
+	// prettyPrint.PrettyPrint(result)
 	return nil
 }
