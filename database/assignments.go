@@ -10,7 +10,8 @@ import (
 func AddAssignmentToClassroom(assignment *models.Assignment, classroom *models.Classroom) error {
 	DBLock.Lock()
 	defer DBLock.Unlock()
-	result := DB.Model(classroom).Association("Assignments").Append(assignment)
+	// result := DB.Model(classroom).Association("Assignments").Append(assignment)
+	_ = DB.Model(classroom).Association("Assignments").Append(assignment)
 
 	// FIXME: this result becomes null. I HAVE NO IDEA WHY.
 	// Find out why
