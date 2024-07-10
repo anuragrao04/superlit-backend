@@ -23,3 +23,14 @@ func AddAssignmentToClassroom(assignment *models.Assignment, classroom *models.C
 	// prettyPrint.PrettyPrint(result)
 	return nil
 }
+
+func GetAssignment(assignmentID uint) (*models.Assignment, error) {
+	DBLock.Lock()
+	defer DBLock.Unlock()
+	var assignment models.Assignment
+	result := DB.Preload("Questions.ExampleCases").Preload("Questions.TestCases").Preload("Classrooms.Users").First(&assignment, assignmentID)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &assignment, nil
+}

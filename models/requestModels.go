@@ -92,6 +92,11 @@ type CreateAssignmentRequest struct {
 	EndTime      time.Time  `json:"endTime"`      // end time of the assignment
 }
 
+type GetAssignmentRequest struct {
+	ClassroomCode string `json:"classroomCode"`
+	AssignmentID  uint   `json:"assignmentID"`
+}
+
 // AI Stuff
 type AIVerifyConstraintsInstantTestRequest struct {
 	PrivateCode string `json:"privateCode"`

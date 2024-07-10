@@ -95,6 +95,8 @@ func main() {
 
 	router.POST("/assignment/createassignment", tokens.VerifyToken, assignments.CreateAssignment)
 
+	router.POST("/assignment/get", tokens.VerifyToken, assignments.GetAssignment)
+
 	// INSTANT TEST STUFF
 	// Create an instant test
 	router.POST("/instanttest/create", instantTest.CreateTest)

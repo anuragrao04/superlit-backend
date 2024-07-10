@@ -67,6 +67,16 @@ func CreateAssignment(c *gin.Context) {
 	newAssignment.EndTime = request.EndTime
 	newAssignment.Questions = request.Questions
 
+	// TODO: Move this to database package
+	database.DBLock.Lock()
+	err = database.DB.Create(&newAssignment).Error
+	database.DBLock.Unlock()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating assignment"})
+		return
+	}
+
 	// now we need to iterate over the classroom IDs and add this assignment to each classroom
 	for _, classroomID := range request.ClassroomIDs {
 		classroom, err := database.GetClassroomByID(classroomID)
