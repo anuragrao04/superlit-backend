@@ -15,6 +15,7 @@ func CreateAssignment(c *gin.Context) {
 	err := c.BindJSON(&request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
+		return
 	}
 	value, ok := c.Get("claims")
 	claims, ok := value.(jwt.MapClaims)

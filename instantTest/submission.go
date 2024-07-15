@@ -19,6 +19,7 @@ func Submit(c *gin.Context) {
 
 	// now we fetch the Test from the database
 	test := models.InstantTest{}
+	// TODO: Move this to database package
 	database.DBLock.Lock()
 	database.DB.Preload("Questions").Preload("Questions.ExampleCases").Preload("Questions.TestCases").Where("public_code = ?", submitRequest.PublicCode).First(&test)
 	database.DBLock.Unlock()

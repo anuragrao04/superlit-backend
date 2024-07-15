@@ -72,6 +72,8 @@ func main() {
 	// TODO signing with email
 	router.POST("/auth/signinwithuniversityid", auth.SignInWithUniversityID)
 
+	router.GET("/auth/isteacher", tokens.VerifyToken, auth.IsTeacherFromToken)
+
 	// this route is for users who've forgotten their password.
 	// It takes in University ID and sends a password reset link to their email
 	router.POST("/auth/forgotpassword", auth.ForgotPassword)
@@ -93,9 +95,23 @@ func main() {
 	// list assignments of a particular classroom
 	router.POST("/assignment/listassignments", tokens.VerifyToken, classroom.ListAssignments)
 
+	// create an assignment
 	router.POST("/assignment/createassignment", tokens.VerifyToken, assignments.CreateAssignment)
 
+	// get assignment data. Used when a student attempts an assignment. It returns questions and stuff
 	router.POST("/assignment/get", tokens.VerifyToken, assignments.GetAssignment)
+
+	// submit an assignment. Does scoring and stores in DB
+	router.POST("/assignment/submit", tokens.VerifyToken, assignments.Submit)
+
+	// get submissions for an assignment
+	router.POST("/assignment/getsubmissions", tokens.VerifyToken, assignments.GetAssignmentSubmissions)
+
+	// google sheet population for assignment
+	router.POST("/assignment/populategooglesheet", tokens.VerifyToken, googleSheets.PopulateGoogleSheetAssignment)
+
+	// AI Verification of assignment
+	router.POST("/assignment/aiverify", AI.AIVerifyConstraintsAssignment)
 
 	// INSTANT TEST STUFF
 	// Create an instant test

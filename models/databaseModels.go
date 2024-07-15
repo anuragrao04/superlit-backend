@@ -9,12 +9,14 @@ import (
 
 type User struct {
 	gorm.Model
-	UniversityID string      `json:"universityID"` // this may be employee ID or student ID (EMP ID and SRN in terms of PES)
-	Name         string      `json:"name"`
-	Email        string      `json:"email"`
-	Password     string      `json:"password"`
-	IsTeacher    bool        `json:"isTeacher"`
-	Classrooms   []Classroom `gorm:"many2many:user_classroom;" json:"classrooms"`
+	UniversityID string                 `json:"universityID"` // this may be employee ID or student ID (EMP ID and SRN in terms of PES)
+	Name         string                 `json:"name"`
+	Email        string                 `json:"email"`
+	Password     string                 `json:"password"`
+	IsTeacher    bool                   `json:"isTeacher"`
+	Classrooms   []Classroom            `gorm:"many2many:user_classroom;" json:"classrooms"`
+	Submissions  []AssignmentSubmission `json:"submissions"`
+	// all the submissions that this dude has made
 }
 
 // aka class
@@ -29,13 +31,13 @@ type Classroom struct {
 // aka test
 type Assignment struct {
 	gorm.Model
-	Name        string       `json:"name"`
-	Description string       `json:"description"`
-	StartTime   time.Time    `json:"startTime"`
-	EndTime     time.Time    `json:"endTime"`
-	Classrooms  []Classroom  `gorm:"many2many:assignment_classroom;" json:"classrooms"`
-	Questions   []Question   `gorm:"foreignKey:AssignmentID" json:"questions"`
-	Submissions []Submission `gorm:"foreignKey:AssignmentID" json:"submissions"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	StartTime   time.Time              `json:"startTime"`
+	EndTime     time.Time              `json:"endTime"`
+	Classrooms  []Classroom            `gorm:"many2many:assignment_classroom;" json:"classrooms"`
+	Questions   []Question             `gorm:"foreignKey:AssignmentID" json:"questions"`
+	Submissions []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"submissions"`
 
 	// this is the classrooms in which the assignment is assigned.
 	// Since every classroom can have multiple assignments, and one assignment may be assigned to multiple classrooms, we have a many to many relationship
@@ -62,18 +64,18 @@ type InstantTestSubmission struct {
 	TotalScore    int      `json:"totalScore"`
 }
 
-type Submission struct {
+type AssignmentSubmission struct {
 	gorm.Model
 	AssignmentID uint     `json:"assignmentID"`
 	UserID       uint     `json:"userID"`
-	User         User     `json:"user"`
+	UniversityID string   `json:"universityID"`
 	Answers      []Answer `json:"answers"`
 	TotalScore   int      `json:"totalScore"`
 }
 
 type Answer struct {
 	gorm.Model
-	SubmissionID            uint               `json:"submissionID"`
+	AssignmentSubmissionID  uint               `json:"assignmentSubmissionID"`
 	InstantTestSubmissionID uint               `json:"instantTestSubmissionID"`
 	QuestionID              uint               `json:"questionID"`
 	Code                    string             `json:"code"`
@@ -82,9 +84,6 @@ type Answer struct {
 	AIVerified              bool               `json:"AIVerified"` // if AI has verified the code
 	AIVerdict               bool               `json:"AIVerdict"`  // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
 }
-
-// The below gymnastics is because GORM doesn't support storing []string directly.
-// So we have to implement the Scanner and Valuer interfaces to convert the []string to a varchar and back
 
 type Question struct {
 	gorm.Model

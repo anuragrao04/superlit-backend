@@ -92,6 +92,8 @@ func ChangeActiveStatusInstantTest(active bool, privateCode string) (err error) 
 	return nil
 }
 
+// the below function is used to update the submission and answers of a student
+// if the submission exists, we update it. If not, it's created
 func UpsertSubmissionAndAnswers(instantTestID uint, universityID string, newAnswer models.Answer) error {
 	// this creates a transaction. If any error occurs in any step, the entire transaction is rolled back
 	// this ensures updating the submission and the answers is atomic

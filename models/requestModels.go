@@ -11,10 +11,11 @@ type RunRequest struct {
 	Input    string `json:"input"`
 }
 
-type SubmitRequest struct {
-	Code     string `json:"code"`
-	Language string `json:"language"`
-	TestID   string `json:"testID"` // this will be the test ID of the test stored in the database
+type AssignmentSubmitRequest struct {
+	Code         string `json:"code"`
+	Language     string `json:"language"`
+	AssignmentID uint   `json:"assignmentID"` // this will be the test ID of the test stored in the database
+	QuestionID   uint   `json:"questionID"`
 }
 
 type InstantTestSubmitRequest struct {
@@ -27,6 +28,10 @@ type InstantTestSubmitRequest struct {
 
 type InstantTestGetSubmissionsRequest struct {
 	PrivateCode string `json:"privateCode"`
+}
+
+type GetAssignmentSubmissionsRequest struct {
+	AssignmentID uint `json:"assignmentID"`
 }
 
 type CreateInstantTestRequest struct {
@@ -54,6 +59,10 @@ type SignUpRequest struct {
 type SignInRequestUniversityID struct {
 	UniversityID string `json:"universityID"`
 	Password     string `json:"password"`
+}
+
+type IsTeacherFromTokenRequest struct {
+	Token string `json:"token"`
 }
 
 type SignInRequestEmail struct {
@@ -102,9 +111,18 @@ type AIVerifyConstraintsInstantTestRequest struct {
 	PrivateCode string `json:"privateCode"`
 }
 
+type AIVerifyConstraintsAssignmentRequest struct {
+	AssignmentID uint `json:"assignmentID"`
+}
+
 // Google Sheets Stuff
 
 type PopulateGoogleSheetInstantTestSubmissionsRequest struct {
 	PrivateCode     string `json:"privateCode"`
+	GoogleSheetLink string `json:"googleSheetLink"`
+}
+
+type PopulateGoogleSheetAssignmentSubmissionsRequest struct {
+	AssignmentID    uint   `json:"assignmentID"`
 	GoogleSheetLink string `json:"googleSheetLink"`
 }

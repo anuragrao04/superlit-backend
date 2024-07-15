@@ -20,6 +20,6 @@ func Connect(dbFilePath string) (*gorm.DB, error) {
 		panic("failed to connect database")
 	}
 
-	DB.AutoMigrate(&models.User{}, &models.Classroom{}, &models.Assignment{}, &models.Submission{}, &models.TestCase{}, &models.Question{}, &models.InstantTest{}, &models.InstantTestSubmission{}, &models.Answer{}, &models.ExampleTestCase{}, &models.VerifiedTestCase{})
+	DB.AutoMigrate(&models.User{}, &models.Classroom{}, &models.Assignment{}, &models.AssignmentSubmission{}, &models.TestCase{}, &models.Question{}, &models.InstantTest{}, &models.InstantTestSubmission{}, &models.Answer{}, &models.ExampleTestCase{}, &models.VerifiedTestCase{})
 	return DB, nil
 }

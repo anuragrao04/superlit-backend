@@ -31,6 +31,10 @@ func GetSubmissions(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+	// TODO: The frontend parses these questionIDs
+	// and maps them to question numbers. This should not be the case.
+	// We have to do data manipulations on backend only.
+	// Refer the implementation on assignment.GetAssignmentSubmissions()
 
 	c.JSON(http.StatusOK, gin.H{"submissions": submissions, "questionIDs": questionIDs, "isActive": isActive})
 }
