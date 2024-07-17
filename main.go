@@ -107,11 +107,22 @@ func main() {
 	// get submissions for an assignment
 	router.POST("/assignment/getsubmissions", tokens.VerifyToken, assignments.GetAssignmentSubmissions)
 
+	// get submissions for a student
+	router.POST("/assignment/getsubmissionforstudent", tokens.VerifyToken, assignments.GetStudentSubmission)
+
 	// google sheet population for assignment
 	router.POST("/assignment/populategooglesheet", tokens.VerifyToken, googleSheets.PopulateGoogleSheetAssignment)
 
 	// AI Verification of assignment
 	router.POST("/assignment/aiverify", AI.AIVerifyConstraintsAssignment)
+
+	// This route is used when a teacher wants to edit an assignment
+	// It will send the existing assignment data to the teacher
+	router.POST("/assignment/getforedit", tokens.VerifyToken, assignments.GetAssignmentForEdit)
+
+	// The below route is used to save the edited assignment
+	// obtained from the above route
+	router.POST("/assignment/saveedited", tokens.VerifyToken, assignments.SaveEditedAssignment)
 
 	// INSTANT TEST STUFF
 	// Create an instant test

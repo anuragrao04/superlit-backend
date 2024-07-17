@@ -53,6 +53,18 @@ func GetAssignmentForAIVerification(assignmentID uint) (models.Assignment, error
 	return test, nil
 }
 
+func GetAssignmentForEdit(assignmentID uint) (models.Assignment, error) {
+	var test models.Assignment
+	DBLock.Lock()
+	defer DBLock.Unlock()
+	err := DB.Preload("Questions").Preload("Questions.ExampleCases").Preload("Classrooms").Preload("Questions.TestCases").First(&test, assignmentID).Error
+	if err != nil {
+		log.Println("Failed to get test: ", err)
+		return models.Assignment{}, err
+	}
+	return test, nil
+}
+
 // the below function is used to update the submission and answers of a student
 // if the submission exists, we update it. If not, it's created
 func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, universityID string, newAnswer models.Answer) error {
@@ -138,6 +150,34 @@ func GetAssignmentSubmissions(assignmentID uint) (submissions []models.Assignmen
 	}
 
 	return assignment.Submissions, questionIDs, nil
+}
+
+func GetAssignmentSubmissionPerStudent(assignmentID, userID uint) (submission models.AssignmentSubmission, questionIDs []uint, questions []models.Question, err error) {
+	DBLock.Lock()
+	defer DBLock.Unlock()
+
+	err = DB.Preload("Answers.TestCases").Where("assignment_id = ? AND user_id = ?", assignmentID, userID).First(&submission).Error
+
+	if err != nil {
+		log.Println(err)
+		return // submission, questionIDs, err are auto returned.
+		// we only care about the value of err
+		// submission and questionIDs take their zero values
+	}
+
+	var assignment models.Assignment
+
+	err = DB.Preload("Questions").First(&assignment, assignmentID).Error
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	for _, question := range assignment.Questions {
+		questionIDs = append(questionIDs, question.ID)
+	}
+
+	return submission, questionIDs, assignment.Questions, nil
 }
 
 func SaveAssignment(assignment models.Assignment) error {

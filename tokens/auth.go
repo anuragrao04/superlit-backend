@@ -2,6 +2,7 @@ package tokens
 
 import (
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +12,7 @@ import (
 // this function creates a token on sign in. All subsequent authorized requests
 // must use this token
 func CreateSignInToken(userID uint, universityID string, isTeacher bool, name string, email string) (string, error) {
-	ttl := 24 * time.Hour
+	ttl := 30 * 24 * time.Hour // 30 days
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
@@ -36,7 +37,8 @@ func VerifyToken(c *gin.Context) {
 	tokenString := c.GetHeader("Authorization")
 	if tokenString == "" {
 		log.Println("No token provided")
-		c.JSON(401, gin.H{"error": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		log.Println("token expired")
 		c.Abort()
 		return
 	}

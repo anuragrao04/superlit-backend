@@ -106,6 +106,18 @@ type GetAssignmentRequest struct {
 	AssignmentID  uint   `json:"assignmentID"`
 }
 
+type GetAssignmentForEditRequest struct {
+	AssignmentID uint `json:"assignmentID"`
+}
+
+type SaveEditedAssignmentRequest struct {
+	EditedAssignment Assignment `json:"editedAssignment"`
+}
+
+type GetStudentSubmissionRequest struct {
+	AssignmentID uint `json:"assignmentID"`
+}
+
 // AI Stuff
 type AIVerifyConstraintsInstantTestRequest struct {
 	PrivateCode string `json:"privateCode"`
