@@ -22,7 +22,7 @@ func ForgotPassword(c *gin.Context) {
 	link, user, err := tokens.CreateForgotLink(forgotPasswordRequest.UniversityID)
 	if err != nil {
 		log.Println(err)
-		c.JSON(500, gin.H{"error": "Internal Server Error"})
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
