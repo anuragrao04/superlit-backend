@@ -23,9 +23,11 @@ func CreateClassroom(Name string, TeacherID uint) (*models.Classroom, error) {
 		return nil, errors.New("user is not a teacher")
 	}
 	code := generateUniqueCode()
+	teacherCode := generateUniqueTeacherCode()
 	classroom := models.Classroom{
-		Name: Name,
-		Code: code,
+		Name:        Name,
+		Code:        code,
+		TeacherCode: teacherCode,
 	}
 
 	DBLock.Lock()
@@ -36,7 +38,7 @@ func CreateClassroom(Name string, TeacherID uint) (*models.Classroom, error) {
 	}
 
 	// Add the teacher to the classroom
-	err = AddUserToClassroom(TeacherID, classroom.Code, true)
+	err = AddUserToClassroom(TeacherID, classroom.TeacherCode, true)
 	return &classroom, err
 }
 
@@ -51,12 +53,21 @@ func AddUserToClassroom(UserID uint, ClassroomCode string, IsTeacher bool) error
 		return errors.New("user not found")
 	}
 
-	if err := DB.Where("code = ?", ClassroomCode).First(&classroom).Error; err != nil {
-		return errors.New("classroom not found")
-	}
+	if !IsTeacher {
+		if err := DB.Where("code = ?", ClassroomCode).First(&classroom).Error; err != nil {
+			return errors.New("classroom not found")
+		}
 
-	classroom.Users = append(classroom.Users, user) // Add the user to the classroom
-	// updating it here will add the association in the user struct as well. GORM takes care of it
+		classroom.Users = append(classroom.Users, user) // Add the user to the classroom
+		// updating it here will add the association in the user struct as well. GORM takes care of it
+	} else {
+		// If the user is a teacher, we need to find the classroom using the teacher code
+		if err := DB.Where("teacher_code = ?", ClassroomCode).First(&classroom).Error; err != nil {
+			return errors.New("classroom not found")
+		}
+		classroom.Users = append(classroom.Users, user) // Add the user to the classroom
+		// updating it here will add the association in the user struct as well. GORM takes care of it
+	}
 
 	if err := DB.Save(&classroom).Error; err != nil {
 		return fmt.Errorf("failed to associate user with classroom: %w", err)
@@ -72,6 +83,21 @@ func generateUniqueCode() string {
 		// if it is , generate a new code, else return the code
 		DBLock.Lock()
 		DB.Model(&models.Classroom{}).Where("code = ?", code).Count(&count)
+		DBLock.Unlock()
+		if count == 0 {
+			return code
+		}
+	}
+}
+
+func generateUniqueTeacherCode() string {
+	for {
+		code := generateRandomCode()
+		var count int64
+		// Check if the code already exists in the database
+		// if it is , generate a new code, else return the code
+		DBLock.Lock()
+		DB.Model(&models.Classroom{}).Where("teacher_code = ?", code).Count(&count)
 		DBLock.Unlock()
 		if count == 0 {
 			return code

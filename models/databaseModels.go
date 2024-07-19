@@ -23,7 +23,8 @@ type User struct {
 type Classroom struct {
 	gorm.Model
 	Name        string       `json:"name"`
-	Code        string       `json:"code"` // this is the code that students will use to join the classroom
+	Code        string       `json:"code"`        // this is the code that students will use to join the classroom
+	TeacherCode string       `json:"teacherCode"` // this is the code that teachers will use to join the classroom
 	Users       []User       `json:"users" gorm:"many2many:user_classroom;"`
 	Assignments []Assignment `json:"assignments" gorm:"many2many:assignment_classroom;"`
 }
