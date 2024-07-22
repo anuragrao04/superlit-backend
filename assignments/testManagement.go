@@ -28,7 +28,7 @@ func CreateAssignment(c *gin.Context) {
 	}
 	if !isTeacher {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Aye catch that fellow. Tryna create a test being a student"})
-		log.Println("Someone is trying to do something funny with our system")
+		log.Println("Someone is trying to do something funny with our system. Catch that fellow, tryna create a test being a student")
 		return
 	}
 
@@ -37,11 +37,15 @@ func CreateAssignment(c *gin.Context) {
 	user, err := database.GetUserByID(userID)
 
 	allClassroomsAuthorized := true
+	log.Println("Checking for: ", request.ClassroomIDs)
 	for _, classroomID := range request.ClassroomIDs {
 		classroomAuthorized := false
 		// look for this ID in user.Classrooms
+		log.Println("Checking if user is authorized to create assignment in classroom ", classroomID)
 		for _, classroom := range user.Classrooms {
+			log.Println("iterated through classroom ID: ", classroom.ID, "user: ", user.Name)
 			if classroom.ID == classroomID {
+				log.Println("User is authorized to create assignment in classroom", classroomID)
 				classroomAuthorized = true
 				break
 			}
@@ -54,7 +58,7 @@ func CreateAssignment(c *gin.Context) {
 
 	if !allClassroomsAuthorized {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "You are not authorized to create assignments in one or more of the classrooms"})
-		log.Println("Someone is trying to do something funny with our system")
+		log.Println("Someone is trying to do something funny with our system. Catch that fellow, tryna create a test in a classroom they aren't a teacher in")
 		return
 	}
 

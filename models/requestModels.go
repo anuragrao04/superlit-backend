@@ -118,6 +118,15 @@ type GetStudentSubmissionRequest struct {
 	AssignmentID uint `json:"assignmentID"`
 }
 
+type AddStudentToBlacklistRequest struct {
+	AssignmentID uint `json:"assignmentID"`
+}
+
+type ExcuseStudentFromBlacklistRequest struct {
+	AssignmentID uint `json:"assignmentID"`
+	StudentID    uint `json:"studentID"`
+}
+
 // AI Stuff
 type AIVerifyConstraintsInstantTestRequest struct {
 	PrivateCode string `json:"privateCode"`
@@ -125,6 +134,12 @@ type AIVerifyConstraintsInstantTestRequest struct {
 
 type AIVerifyConstraintsAssignmentRequest struct {
 	AssignmentID uint `json:"assignmentID"`
+}
+
+type AIGiveHintRequest struct {
+	Code       string `json:"code"`
+	Language   string `json:"language"`
+	QuestionID uint   `json:"questionID"`
 }
 
 // Google Sheets Stuff

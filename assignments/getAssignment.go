@@ -2,6 +2,7 @@ package assignments
 
 import (
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/anuragrao04/superlit-backend/database"
@@ -24,6 +25,7 @@ func GetAssignment(c *gin.Context) {
 	// first we need to do a couple of checks
 	// 1. User belongs to the classroom
 	// 2. Assignment is active (the time of the request is between start time and end time)
+	// 3. User does not belong to the blacklist
 
 	value, ok := c.Get("claims")
 	claims, ok := value.(jwt.MapClaims)
@@ -64,6 +66,20 @@ func GetAssignment(c *gin.Context) {
 	if timeNow.Before(assignment.StartTime) || timeNow.After(assignment.EndTime) {
 		// if the time is not between the start and end time, we return an error
 		c.JSON(403, gin.H{"error": "Assignment is not active"})
+		return
+	}
+
+	// now we see that our user does not belong to the blacklist
+	userBelongsToBlacklist := false
+	for _, user := range assignment.BlacklistedStudents {
+		if user.ID == userID {
+			userBelongsToBlacklist = true
+			break
+		}
+	}
+
+	if userBelongsToBlacklist {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You are blacklisted from this assignment"})
 		return
 	}
 

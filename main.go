@@ -116,6 +116,9 @@ func main() {
 	// AI Verification of assignment
 	router.POST("/assignment/aiverify", AI.AIVerifyConstraintsAssignment)
 
+	// gives a hint to the student
+	router.POST("/AIHint", AI.GiveHint)
+
 	// This route is used when a teacher wants to edit an assignment
 	// It will send the existing assignment data to the teacher
 	router.POST("/assignment/getforedit", tokens.VerifyToken, assignments.GetAssignmentForEdit)
@@ -123,6 +126,12 @@ func main() {
 	// The below route is used to save the edited assignment
 	// obtained from the above route
 	router.POST("/assignment/saveedited", tokens.VerifyToken, assignments.SaveEditedAssignment)
+
+	// add student to blacklist in case he's caught cheating
+	router.POST("/assignment/addstudenttoblacklist", tokens.VerifyToken, assignments.AddStudentToBlackList)
+
+	// excuse student
+	router.POST("/assignment/excusestudent", tokens.VerifyToken, assignments.ExcuseStudentFromBlacklist)
 
 	// INSTANT TEST STUFF
 	// Create an instant test

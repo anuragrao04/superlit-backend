@@ -32,14 +32,14 @@ type Classroom struct {
 // aka test
 type Assignment struct {
 	gorm.Model
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	StartTime   time.Time              `json:"startTime"`
-	EndTime     time.Time              `json:"endTime"`
-	Classrooms  []Classroom            `gorm:"many2many:assignment_classroom;" json:"classrooms"`
-	Questions   []Question             `gorm:"foreignKey:AssignmentID" json:"questions"`
-	Submissions []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"submissions"`
-
+	Name                string                 `json:"name"`
+	Description         string                 `json:"description"`
+	StartTime           time.Time              `json:"startTime"`
+	EndTime             time.Time              `json:"endTime"`
+	Classrooms          []Classroom            `gorm:"many2many:assignment_classroom;" json:"classrooms"`
+	Questions           []Question             `gorm:"foreignKey:AssignmentID" json:"questions"`
+	BlacklistedStudents []User                 `gorm:"many2many:assignment_user_blacklist;" json:"blacklistedStudents"` // students who've been caught cheating
+	Submissions         []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"submissions"`
 	// this is the classrooms in which the assignment is assigned.
 	// Since every classroom can have multiple assignments, and one assignment may be assigned to multiple classrooms, we have a many to many relationship
 }
@@ -49,12 +49,13 @@ type Assignment struct {
 // Public code is shared with students. This code is used to attempt the test
 type InstantTest struct {
 	gorm.Model
-	Email       string                  `json:"email"`
-	PrivateCode string                  `json:"privateCode"`
-	PublicCode  string                  `json:"publicCode"`
-	IsActive    bool                    `json:"isActive"`
-	Questions   []Question              `gorm:"foreignKey:InstantTestID" json:"questions"`
-	Submissions []InstantTestSubmission `gorm:"foreignKey:InstantTestID" json:"submissions"`
+	Email                    string                  `json:"email"`
+	PrivateCode              string                  `json:"privateCode"`
+	PublicCode               string                  `json:"publicCode"`
+	IsActive                 bool                    `json:"isActive"`
+	Questions                []Question              `gorm:"foreignKey:InstantTestID" json:"questions"`
+	Submissions              []InstantTestSubmission `gorm:"foreignKey:InstantTestID" json:"submissions"`
+	BlacklistedUniversityIDs pq.StringArray          `json:"blacklistedUniversityIDs"` // students who've been caught cheatingy
 }
 
 type InstantTestSubmission struct {

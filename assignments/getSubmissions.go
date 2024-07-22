@@ -181,5 +181,11 @@ func GetAssignmentSubmissions(c *gin.Context) {
 		formattedReturn = append(formattedReturn, formattedSubmission)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"submissions": formattedReturn, "maxNumberOfQuestions": len(questionIDs)})
+	blacklist, err := database.GetAssignmentBlacklist(getSubmissionsRequest.AssignmentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"submissions": formattedReturn, "maxNumberOfQuestions": len(questionIDs), "blacklistedStudents": blacklist})
 }

@@ -174,7 +174,7 @@ func verifyConstraintsInBackgroundAssignment(assignment models.Assignment) {
 			prompt += answer.Code
 
 			postBody, _ := json.Marshal(map[string]interface{}{
-				"model":  "superlit",
+				"model":  "superlit-verify-lite",
 				"format": "json",
 				"stream": false,
 				"prompt": prompt,
