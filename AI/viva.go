@@ -3,20 +3,18 @@ package AI
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/anuragrao04/superlit-backend/database"
-	"github.com/anuragrao04/superlit-backend/instantTest"
 	"github.com/anuragrao04/superlit-backend/models"
 	"github.com/gin-gonic/gin"
 )
 
-func GiveHint(c *gin.Context) {
-	var request models.AIGiveHintRequest
+func GetVivaQuestions(c *gin.Context) {
+	var request models.AIGetVivaQuestionsRequest
 	err := c.BindJSON(&request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
@@ -27,12 +25,6 @@ func GiveHint(c *gin.Context) {
 	database.DBLock.Lock()
 	database.DB.First(&question, request.QuestionID)
 	database.DBLock.Unlock()
-
-	// although this function is part of instant test package
-	// we can use it to calculate score of any test
-	_, _, testCasesFailed, err := instantTest.CalculateScore(question, request.Code, request.Language)
-	// TODO: change this entire format to fmt.Sprintf
-	// The current way is confusing to new developers
 
 	prompt := `Question Title:
 	`
@@ -51,26 +43,8 @@ func GiveHint(c *gin.Context) {
 	` // the new line here is important
 	prompt += request.Code
 
-	prompt += `Test Cases Failed: 
-	`
-	for i, testCase := range testCasesFailed {
-		prompt += `Case ` + fmt.Sprint(i+1) + `:
-`
-		prompt += `Input:
-`
-		prompt += testCase.Input + "\n"
-
-		prompt += `Expected Output:
-`
-		prompt += testCase.ExpectedOutput + "\n"
-
-		prompt += `Produced Output:
-`
-		prompt += testCase.ProducedOutput + "\n"
-	}
-
 	postBody, _ := json.Marshal(map[string]interface{}{
-		"model":  "superlit-hint-lite",
+		"model":  "superlit-viva-lite",
 		"format": "json",
 		"stream": false,
 		"prompt": prompt,
@@ -89,7 +63,7 @@ func GiveHint(c *gin.Context) {
 
 	body, err := io.ReadAll(resp.Body)
 
-	var response ollamaHintResponse
+	var response ollamaVivaResponse
 	err = json.Unmarshal(body, &response)
 
 	if err != nil {
@@ -97,8 +71,8 @@ func GiveHint(c *gin.Context) {
 		return
 	}
 
-	var ollamaHint ollamaHintAnswer
-	err = json.Unmarshal([]byte(response.Response), &ollamaHint)
+	var ollamaViva ollamaVivaAnswer
+	err = json.Unmarshal([]byte(response.Response), &ollamaViva)
 	if err != nil {
 		// TODO: write logic to retry.
 		// but for now, I'm assuming that the model will return in JSON only.
@@ -108,14 +82,19 @@ func GiveHint(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"hint": ollamaHint.Hint})
-
+	c.JSON(http.StatusOK, ollamaViva)
 }
 
-type ollamaHintResponse struct {
+type ollamaVivaResponse struct {
 	Response string `json:"response"`
 }
 
-type ollamaHintAnswer struct {
-	Hint string `json:"hint"`
+type ollamaVivaAnswer struct {
+	Questions []vivaQuestions `json:"vivaQuestions"`
+}
+
+type vivaQuestions struct {
+	Question      string   `json:"question"`
+	Options       []string `json:"options"`
+	CorrectOption uint     `json:"correctOption"`
 }

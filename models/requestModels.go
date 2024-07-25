@@ -142,6 +142,11 @@ type AIGiveHintRequest struct {
 	QuestionID uint   `json:"questionID"`
 }
 
+type AIGetVivaQuestionsRequest struct {
+	Code       string `json:"code"`
+	QuestionID uint   `json:"questionID"`
+}
+
 // Google Sheets Stuff
 
 type PopulateGoogleSheetInstantTestSubmissionsRequest struct {

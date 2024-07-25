@@ -117,7 +117,10 @@ func main() {
 	router.POST("/assignment/aiverify", AI.AIVerifyConstraintsAssignment)
 
 	// gives a hint to the student
-	router.POST("/AIHint", AI.GiveHint)
+	router.POST("/aihint", AI.GiveHint)
+
+	// AI Viva
+	router.POST("/aiviva", AI.GetVivaQuestions)
 
 	// This route is used when a teacher wants to edit an assignment
 	// It will send the existing assignment data to the teacher
