@@ -78,9 +78,10 @@ func GetStudentSubmission(c *gin.Context) {
 		Attempted           bool                      `json:"attempted"`
 		Code                string                    `json:"code"`
 		AIVerified          bool                      `json:"AIVerified"`
-		AIVerdict           bool                      `json:"AIVerdict"`   // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
-		AIVivaTaken         bool                      `json:"AIVivaTaken"` // if AI Viva was taken
-		AIVivaScore         int                       `json:"AIVivaScore"` // how many viva questions did the student answer correctly
+		AIVerdict           bool                      `json:"AIVerdict"`           // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
+		AIVerdictFailReason string                    `json:"AIVerdictFailReason"` // if AI has flagged, why?
+		AIVivaTaken         bool                      `json:"AIVivaTaken"`         // if AI Viva was taken
+		AIVivaScore         int                       `json:"AIVivaScore"`         // how many viva questions did the student answer correctly
 		Score               int                       `json:"score"`
 		TestCases           []models.VerifiedTestCase `json:"testCases"`
 		// we will remove the input, expected output and student output from the above.
@@ -104,6 +105,7 @@ func GetStudentSubmission(c *gin.Context) {
 		returnArray[questionNumberIndex].Code = answer.Code
 		returnArray[questionNumberIndex].AIVerified = answer.AIVerified
 		returnArray[questionNumberIndex].AIVerdict = answer.AIVerdict
+		returnArray[questionNumberIndex].AIVerdictFailReason = answer.AIVerdictFailReason
 		returnArray[questionNumberIndex].AIVivaTaken = answer.AIVivaTaken
 		returnArray[questionNumberIndex].AIVivaScore = answer.AIVivaScore
 		returnArray[questionNumberIndex].Score = answer.Score
