@@ -67,12 +67,12 @@ func GetAssignmentForEdit(assignmentID uint) (models.Assignment, error) {
 
 // the below function is used to update the submission and answers of a student
 // if the submission exists, we update it. If not, it's created
-func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, universityID string, newAnswer models.Answer) error {
+func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, universityID string, newAnswer models.Answer) (uint, error) {
 	// this creates a transaction. If any error occurs in any step, the entire transaction is rolled back
 	// this ensures updating the submission and the answers is atomic
 	DBLock.Lock()
 	defer DBLock.Unlock()
-	return DB.Transaction(func(tx *gorm.DB) error {
+	err := DB.Transaction(func(tx *gorm.DB) error {
 		// Find existing submission
 		var submission models.AssignmentSubmission
 		err := tx.Preload("Answers").Preload("Answers.TestCases").Where("assignment_id = ? AND user_id = ?", assignmentID, userID).First(&submission).Error
@@ -132,6 +132,8 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 
 		return nil
 	})
+
+	return newAnswer.ID, err
 }
 
 func GetAssignmentSubmissions(assignmentID uint) (submissions []models.AssignmentSubmission, questionIDs []uint, err error) {
@@ -236,4 +238,34 @@ func GetAssignmentBlacklist(assignmentID uint) ([]models.User, error) {
 		return nil, err
 	}
 	return assignment.BlacklistedStudents, nil
+}
+
+func SetVivaScore(assignmentID, userID, questionID uint, score int) error {
+	DBLock.Lock()
+	defer DBLock.Unlock()
+	var submission models.AssignmentSubmission
+	err := DB.Preload("Answers").Where("assignment_id = ? AND user_id = ?", assignmentID, userID).First(&submission).Error
+	if err != nil {
+		return err
+	}
+
+	var answerIndex int
+	var answerFound bool
+	for i, a := range submission.Answers {
+		if a.QuestionID == questionID {
+			answerIndex = i
+			answerFound = true
+			break
+		}
+	}
+
+	if !answerFound {
+		return errors.New("Answer not found")
+	}
+
+	submission.Answers[answerIndex].AIVivaScore = score
+	submission.Answers[answerIndex].AIVivaTaken = true
+
+	err = DB.Session(&gorm.Session{FullSaveAssociations: true}).Save(&submission).Error
+	return err
 }

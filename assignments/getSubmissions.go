@@ -78,7 +78,9 @@ func GetStudentSubmission(c *gin.Context) {
 		Attempted           bool                      `json:"attempted"`
 		Code                string                    `json:"code"`
 		AIVerified          bool                      `json:"AIVerified"`
-		AIVerdict           bool                      `json:"AIVerdict"` // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
+		AIVerdict           bool                      `json:"AIVerdict"`   // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
+		AIVivaTaken         bool                      `json:"AIVivaTaken"` // if AI Viva was taken
+		AIVivaScore         int                       `json:"AIVivaScore"` // how many viva questions did the student answer correctly
 		Score               int                       `json:"score"`
 		TestCases           []models.VerifiedTestCase `json:"testCases"`
 		// we will remove the input, expected output and student output from the above.
@@ -102,6 +104,8 @@ func GetStudentSubmission(c *gin.Context) {
 		returnArray[questionNumberIndex].Code = answer.Code
 		returnArray[questionNumberIndex].AIVerified = answer.AIVerified
 		returnArray[questionNumberIndex].AIVerdict = answer.AIVerdict
+		returnArray[questionNumberIndex].AIVivaTaken = answer.AIVivaTaken
+		returnArray[questionNumberIndex].AIVivaScore = answer.AIVivaScore
 		returnArray[questionNumberIndex].Score = answer.Score
 		returnArray[questionNumberIndex].TestCases = stripCases(answer.TestCases)
 	}
@@ -148,11 +152,14 @@ func GetAssignmentSubmissions(c *gin.Context) {
 	// now we must do some formatting.
 
 	type answerSubmission struct {
-		QuestionNumber uint   `json:"questionNumber"`
-		Score          uint   `json:"score"`
-		AIVerified     bool   `json:"AIVerified"`
-		AIVerdict      bool   `json:"AIVerdict"`
-		StudentsCode   string `json:"studentsCode"`
+		QuestionNumber      uint   `json:"questionNumber"`
+		Score               uint   `json:"score"`
+		AIVerified          bool   `json:"AIVerified"`
+		AIVerdict           bool   `json:"AIVerdict"`
+		AIVerdictFailReason string `json:"AIVerdictFailReason"`
+		AIVivaTaken         bool   `json:"AIVivaTaken"`
+		AIVivaScore         int    `json:"AIVivaScore"`
+		StudentsCode        string `json:"studentsCode"`
 	}
 
 	type studentSubmission struct {
@@ -176,6 +183,9 @@ func GetAssignmentSubmissions(c *gin.Context) {
 			formattedSubmission.Submissions[questionNumber].QuestionNumber = uint(questionNumber + 1)
 			formattedSubmission.Submissions[questionNumber].AIVerified = answer.AIVerified
 			formattedSubmission.Submissions[questionNumber].AIVerdict = answer.AIVerdict
+			formattedSubmission.Submissions[questionNumber].AIVerdictFailReason = answer.AIVerdictFailReason
+			formattedSubmission.Submissions[questionNumber].AIVivaTaken = answer.AIVivaTaken
+			formattedSubmission.Submissions[questionNumber].AIVivaScore = answer.AIVivaScore
 			formattedSubmission.Submissions[questionNumber].StudentsCode = answer.Code
 		}
 		formattedReturn = append(formattedReturn, formattedSubmission)

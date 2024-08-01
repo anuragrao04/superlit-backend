@@ -1,6 +1,7 @@
 package assignments
 
 import (
+	"github.com/anuragrao04/superlit-backend/AI"
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/instantTest"
 	"github.com/anuragrao04/superlit-backend/models"
@@ -53,7 +54,9 @@ func Submit(c *gin.Context) {
 			answer.TestCases = append(answer.TestCases, testCasesFailed...)
 			answer.Score = score
 
-			err = database.UpsertAssignmentSubmissionAndAnswers(assignment.ID, userID, universityID, answer)
+			answerID, err := database.UpsertAssignmentSubmissionAndAnswers(assignment.ID, userID, universityID, answer)
+
+			go AI.VerifyConstrainstInBackgroundAnswer(question, answerID)
 
 			if err != nil {
 				c.JSON(500, gin.H{"error": err.Error()})

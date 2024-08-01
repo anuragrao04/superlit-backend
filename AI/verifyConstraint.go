@@ -174,7 +174,7 @@ func verifyConstraintsInBackgroundAssignment(assignment models.Assignment) {
 			prompt += answer.Code
 
 			postBody, _ := json.Marshal(map[string]interface{}{
-				"model":  "superlit-verify-lite",
+				"model":  "superlit-verify-heavy",
 				"format": "json",
 				"stream": false,
 				"prompt": prompt,
@@ -211,7 +211,9 @@ func verifyConstraintsInBackgroundAssignment(assignment models.Assignment) {
 			// now we have the verdict from ollama
 			assignment.Submissions[submissionIndex].Answers[answerIndex].AIVerified = true
 			assignment.Submissions[submissionIndex].Answers[answerIndex].AIVerdict = ollamaVerdict.Answer
-
+			if ollamaVerdict.Answer == false {
+				assignment.Submissions[submissionIndex].Answers[answerIndex].AIVerdictFailReason = ollamaVerdict.Reason
+			}
 		}
 	}
 
@@ -229,7 +231,91 @@ type ollamaVerifyResponse struct {
 	Response string `json:"response"`
 }
 type ollamaVerifyAnswer struct {
-	Answer bool `json:"answer"`
+	Answer bool   `json:"answer"`
+	Reason string `json:"reason"`
+}
+
+func VerifyConstrainstInBackgroundAnswer(question models.Question, answerID uint) {
+	log.Println("Verifying constraints for answer: ", answerID)
+	var answer models.Answer
+	database.DBLock.Lock()
+	err := database.DB.First(&answer, answerID).Error
+	database.DBLock.Unlock()
+
+	if err != nil {
+		log.Println("Failed to fetch the answer from the database: ", err)
+		// Silently fail, can't do anything about this
+		return
+	}
+
+	constraints := question.Constraints
+
+	// now we send a request to the server running ollama
+	prompt := `Question Title:
+			`
+
+	prompt += question.Title + "\n"
+
+	prompt += `Question Description:
+			`
+	prompt += question.Question + "\n"
+
+	prompt += `Constraints: 
+			` // the new line here is important
+	for _, constraint := range constraints {
+		prompt += "- " + constraint + "\n"
+	}
+	prompt += `Code:
+			` // the new line here is important
+	prompt += answer.Code
+
+	postBody, _ := json.Marshal(map[string]interface{}{
+		"model":  "superlit-verify-heavy",
+		"format": "json",
+		"stream": false,
+		"prompt": prompt,
+	})
+	responseBody := bytes.NewBuffer(postBody)
+	resp, err := http.Post(os.Getenv("OLLAMA_URL")+"api/generate", "application/json", responseBody)
+	if err != nil {
+		// TODO: Send sad email
+		log.Println("Failed to send request to ollama: ", err)
+		return
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	var response ollamaVerifyResponse
+	err = json.Unmarshal(body, &response)
+
+	if err != nil {
+		// TODO: Send sad email
+		log.Println("Failed to read response from ollama: ", err)
+		return
+	}
+
+	var ollamaVerdict ollamaVerifyAnswer
+	err = json.Unmarshal([]byte(response.Response), &ollamaVerdict)
+	log.Println("Verdict from LLM model: ", ollamaVerdict.Answer)
+	if err != nil {
+		// TODO: write logic to retry.
+		// but for now, I'm assuming that the model will return in JSON only.
+		// that's what ollama's api docs say but just in case
+		log.Println("LLM model returned some bullshit which could not be parsed: ", response.Response)
+		return
+	}
+
+	// now we have the verdict from ollama
+	answer.AIVerified = true
+	answer.AIVerdict = ollamaVerdict.Answer
+
+	if ollamaVerdict.Answer == false {
+		answer.AIVerdictFailReason = ollamaVerdict.Reason
+	}
+
+	// save this answer
+	database.DBLock.Lock()
+	database.DB.Save(&answer)
+	database.DBLock.Unlock()
 }
 
 // takes in the questions array, and a question ID and returns the question struct

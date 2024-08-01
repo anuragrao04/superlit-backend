@@ -55,7 +55,7 @@ type InstantTest struct {
 	IsActive                 bool                    `json:"isActive"`
 	Questions                []Question              `gorm:"foreignKey:InstantTestID" json:"questions"`
 	Submissions              []InstantTestSubmission `gorm:"foreignKey:InstantTestID" json:"submissions"`
-	BlacklistedUniversityIDs pq.StringArray          `json:"blacklistedUniversityIDs"` // students who've been caught cheatingy
+	BlacklistedUniversityIDs pq.StringArray          `json:"blacklistedUniversityIDs" gorm:"type:text[]"` // students who've been caught cheatingy
 }
 
 type InstantTestSubmission struct {
@@ -82,9 +82,12 @@ type Answer struct {
 	QuestionID              uint               `json:"questionID"`
 	Code                    string             `json:"code"`
 	TestCases               []VerifiedTestCase `json:"testCases"`
-	Score                   int                `json:"score"`      // total score for this particular question
-	AIVerified              bool               `json:"AIVerified"` // if AI has verified the code
-	AIVerdict               bool               `json:"AIVerdict"`  // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
+	Score                   int                `json:"score"`               // total score for this particular question
+	AIVerified              bool               `json:"AIVerified"`          // if AI has verified the code
+	AIVerdict               bool               `json:"AIVerdict"`           // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
+	AIVerdictFailReason     string             `json:"AIVerdictFailReason"` // if AI has flagged this answer, the reason why
+	AIVivaScore             int                `json:"AIVivaScore"`         // how many viva questions did the student answer correctly
+	AIVivaTaken             bool               `json:"AIVivaTaken"`         // if the student has taken the viva, or somehow hit back and not answered
 }
 
 type Question struct {

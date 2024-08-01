@@ -33,7 +33,6 @@ func GetAssignment(c *gin.Context) {
 	userID := uint(userIDFloat)
 	if !ok {
 		c.JSON(400, gin.H{"error": "Invalid Request"})
-		log.Println(err.Error())
 		return
 	}
 

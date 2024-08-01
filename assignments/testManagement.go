@@ -6,6 +6,7 @@ import (
 
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
+	"github.com/anuragrao04/superlit-backend/prettyPrint"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -76,6 +77,8 @@ func CreateAssignment(c *gin.Context) {
 	database.DBLock.Lock()
 	err = database.DB.Create(&newAssignment).Error
 	database.DBLock.Unlock()
+
+	prettyPrint.PrettyPrint(newAssignment)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating assignment"})

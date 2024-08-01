@@ -147,6 +147,12 @@ type AIGetVivaQuestionsRequest struct {
 	QuestionID uint   `json:"questionID"`
 }
 
+type SetVivaScoreRequest struct {
+	QuestionID   uint `json:"questionID"`
+	AssignmentID uint `json:"assignmentID"`
+	Score        int  `json:"score"`
+}
+
 // Google Sheets Stuff
 
 type PopulateGoogleSheetInstantTestSubmissionsRequest struct {

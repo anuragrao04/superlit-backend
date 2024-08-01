@@ -122,6 +122,11 @@ func main() {
 	// AI Viva
 	router.POST("/aiviva", AI.GetVivaQuestions)
 
+	// The below function is used to set the viva score of a student
+	// TODO: There is a vulnerability in this function
+	// Please see the function implementation of AI.SetVivaScore
+	router.POST("/aiviva/setvivascore", tokens.VerifyToken, AI.SetVivaScore)
+
 	// This route is used when a teacher wants to edit an assignment
 	// It will send the existing assignment data to the teacher
 	router.POST("/assignment/getforedit", tokens.VerifyToken, assignments.GetAssignmentForEdit)
@@ -161,8 +166,8 @@ func main() {
 	s := &http.Server{
 		Addr:         ":6969",
 		Handler:      router,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  300 * time.Second,
+		WriteTimeout: 300 * time.Second,
 	}
 	log.Println("Listening on port 6969.")
 	s.ListenAndServe()
