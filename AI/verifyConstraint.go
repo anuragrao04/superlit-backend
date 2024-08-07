@@ -72,8 +72,35 @@ func verifyConstraintsInBackground(instantTest models.InstantTest) {
 				return
 			}
 
+			prompt := `
+I am a teacher and you are helping me in verifying if the code written by my students follows the constraints set by me.
+I will give you the question title, question description, a list of constraints and then the code of the student.
+You have to understand the context of the question and tell me if the code follows the given constraints or not.
+For example, the constraint might be to use 'OOPS' concepts in the code, you must reply with true if the code contains OOPS concepts and false if it doesn't.
+You have to meticolously check that every constraint in the list is satisfied. 
+Some students try to cheat by satisfying only some constraints, or satisfying them in a way they are not intended to be used.
+Some constraints are to verify wether a specific language construct is used. For example, a constraint may be 'must use an array of structures'. In these cases, some students might just declare the structure, but not use them in the code.
+This is against the spirit of the question.
+You are to lookout for these malicious compliance cases and reply false if you find any.
+You must also check for any other constraints that might be present in the question description.
+You must also check if the code follows the spirit of the question or not. If it doesn't follow the spirit of the question, treat it as if it doesn't follow the constraints
+If you reply false, you must explain why you're flagging the answer in the 'reason' field in under 3 sentences
+Do not format your answer in markdown.
+Reply in only JSON only.
+The format of the JSON will be like so:
+{
+  "answer": true
+}
+or
+{
+  "answer": false
+  "reason": "<your reason here>"
+}
+
+			`
+
 			// now we send a request to the server running ollama
-			prompt := `Question Title:
+			prompt += `Question Title:
 			`
 
 			prompt += question.Title + "\n"
@@ -92,7 +119,7 @@ func verifyConstraintsInBackground(instantTest models.InstantTest) {
 			prompt += answer.Code
 
 			postBody, _ := json.Marshal(map[string]interface{}{
-				"model":  "superlit",
+				"model":  "superlit-AI",
 				"format": "json",
 				"stream": false,
 				"prompt": prompt,
@@ -153,9 +180,34 @@ func verifyConstraintsInBackgroundAssignment(assignment models.Assignment) {
 				// TODO: Send sad email
 				return
 			}
+			prompt := `
+I am a teacher and you are helping me in verifying if the code written by my students follows the constraints set by me.
+I will give you the question title, question description, a list of constraints and then the code of the student.
+You have to understand the context of the question and tell me if the code follows the given constraints or not.
+For example, the constraint might be to use 'OOPS' concepts in the code, you must reply with true if the code contains OOPS concepts and false if it doesn't.
+You have to meticolously check that every constraint in the list is satisfied. 
+Some students try to cheat by satisfying only some constraints, or satisfying them in a way they are not intended to be used.
+Some constraints are to verify wether a specific language construct is used. For example, a constraint may be 'must use an array of structures'. In these cases, some students might just declare the structure, but not use them in the code.
+This is against the spirit of the question.
+You are to lookout for these malicious compliance cases and reply false if you find any.
+You must also check for any other constraints that might be present in the question description.
+You must also check if the code follows the spirit of the question or not. If it doesn't follow the spirit of the question, treat it as if it doesn't follow the constraints
+If you reply false, you must explain why you're flagging the answer in the 'reason' field in under 3 sentences
+Do not format your answer in markdown.
+Reply in only JSON only.
+The format of the JSON will be like so:
+{
+  "answer": true
+}
+or
+{
+  "answer": false
+  "reason": "<your reason here>"
+}
 
+			`
 			// now we send a request to the server running ollama
-			prompt := `Question Title:
+			prompt += `Question Title:
 			`
 
 			prompt += question.Title + "\n"
@@ -174,7 +226,7 @@ func verifyConstraintsInBackgroundAssignment(assignment models.Assignment) {
 			prompt += answer.Code
 
 			postBody, _ := json.Marshal(map[string]interface{}{
-				"model":  "superlit-verify-heavy",
+				"model":  "superlit-AI",
 				"format": "json",
 				"stream": false,
 				"prompt": prompt,
@@ -251,8 +303,36 @@ func VerifyConstrainstInBackgroundAnswer(question models.Question, answerID uint
 	constraints := question.Constraints
 
 	// now we send a request to the server running ollama
-	prompt := `Question Title:
-			`
+	prompt := `
+I am a teacher and you are helping me in verifying if the code written by my students follows the constraints set by me.
+I will give you the question title, question description, a list of constraints and then the code of the student.
+You have to understand the context of the question and tell me if the code follows the given constraints or not.
+For example, the constraint might be to use 'OOPS' concepts in the code, you must reply with true if the code contains OOPS concepts and false if it doesn't.
+You have to meticolously check that every constraint in the list is satisfied. 
+Some students try to cheat by satisfying only some constraints, or satisfying them in a way they are not intended to be used.
+Some constraints are to verify wether a specific language construct is used. For example, a constraint may be 'must use an array of structures'. In these cases, some students might just declare the structure, but not use them in the code.
+This is against the spirit of the question.
+You are to lookout for these malicious compliance cases and reply false if you find any.
+You must also check for any other constraints that might be present in the question description.
+You must also check if the code follows the spirit of the question or not. If it doesn't follow the spirit of the question, treat it as if it doesn't follow the constraints
+You are an intelligent API so you must reply either true or false in the JSON format given.
+If you reply false, you must explain why you're flagging the answer in the 'reason' field in under 3 sentences
+Do not format your answer in markdown.
+Reply in only JSON only.
+The format of the JSON will be like so:
+{
+  "answer": true
+}
+or
+{
+  "answer": false
+  "reason": "<your reason here>"
+}
+
+	`
+
+	prompt += `Question Title:
+	`
 
 	prompt += question.Title + "\n"
 
@@ -270,7 +350,7 @@ func VerifyConstrainstInBackgroundAnswer(question models.Question, answerID uint
 	prompt += answer.Code
 
 	postBody, _ := json.Marshal(map[string]interface{}{
-		"model":  "superlit-verify-heavy",
+		"model":  "superlit-AI",
 		"format": "json",
 		"stream": false,
 		"prompt": prompt,
