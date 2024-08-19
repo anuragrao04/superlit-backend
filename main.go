@@ -25,10 +25,14 @@ func main() {
 	// initialise the router
 
 	// load envs
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err)
+		panic(err)
+	}
 
 	// load the JWT Secret Key
-	err := tokens.LoadPrivateKey()
+	err = tokens.LoadPrivateKey()
 	if err != nil {
 		log.Println(err)
 		log.Fatal("Error loading private key")

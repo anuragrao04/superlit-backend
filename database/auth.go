@@ -4,14 +4,23 @@ import (
 	"log"
 
 	"github.com/anuragrao04/superlit-backend/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func CreateNewUser(UniversityID string, Name string, Email string, Password string, IsTeacher bool) (err error) {
+	bytePassword := []byte(Password)
+	hashedPassword, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	log.Println("Created new user. Storing password: ", string(hashedPassword))
+
 	user := models.User{
 		UniversityID: UniversityID,
 		Name:         Name,
 		Email:        Email,
-		Password:     Password,
+		Password:     string(hashedPassword),
 		IsTeacher:    IsTeacher,
 		Classrooms:   []models.Classroom{},
 	}
@@ -29,10 +38,14 @@ func GetUserByUniversityIDPassword(UniversityID string, Password string) (user m
 	DBLock.Lock()
 	defer DBLock.Unlock()
 
-	err = DB.Preload("Classrooms").Preload("Classrooms.Assignments").Where("university_id = ? AND password = ?", UniversityID, Password).First(&user).Error
+	err = DB.Preload("Classrooms").Preload("Classrooms.Assignments").Where("university_id = ?", UniversityID).First(&user).Error
 	if err != nil {
 		log.Println(err)
 	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(Password))
+
+	// if err is not nil, it's a match
 	return user, err
 }
 

@@ -86,7 +86,9 @@ func GetOutput(code, input, language string) (string, error) {
 		return output, nil
 
 	} else if language == "py" {
-		output := RunBinary(input, "python", codeFile)
+
+		// Python
+		output := RunBinary(input, "python3", codeFile)
 
 		// we clean up the file
 		os.Remove(codeFile)

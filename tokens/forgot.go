@@ -3,13 +3,15 @@ package tokens
 import (
 	"errors"
 	"fmt"
-	"github.com/anuragrao04/superlit-backend/database"
-	"github.com/anuragrao04/superlit-backend/models"
-	"github.com/golang-jwt/jwt/v5"
-	"gorm.io/gorm"
 	"log"
 	"os"
 	"time"
+
+	"github.com/anuragrao04/superlit-backend/database"
+	"github.com/anuragrao04/superlit-backend/models"
+	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 )
 
 var JWT_SECRET []byte
@@ -106,8 +108,12 @@ func ResetPassword(tokenString, newPassword string) error {
 	}
 
 	// Now that we have validated both the token and the expiry, we can change the password
+	// TODO: Move this to the auth.go file in the database package
 
-	err = database.DB.Model(&models.User{}).Where("id = ?", userID).Update("password", newPassword).Error
+	bytePassword := []byte(newPassword)
+	hashedPassword, err := bcrypt.GenerateFromPassword(bytePassword, bcrypt.DefaultCost)
+
+	err = database.DB.Model(&models.User{}).Where("id = ?", userID).Update("password", hashedPassword).Error
 
 	// if there is an error, we return it. Else it returns nil
 	if err != nil {

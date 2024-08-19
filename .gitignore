@@ -27,7 +27,7 @@ go.work
 *.env
 *.pem
 superlitSheetsKey.json
-
+superlit-application-creds.json
 
 # Compiled binary
 main
