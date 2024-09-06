@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,8 +22,6 @@ import (
 )
 
 func main() {
-	router := gin.Default()
-	// initialise the router
 
 	// load envs
 	err := godotenv.Load()
@@ -30,6 +29,13 @@ func main() {
 		log.Println(err)
 		panic(err)
 	}
+
+	if os.Getenv("ENVIRONMENT") == "PROD" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	router := gin.Default()
+	// initialise the router
 
 	// load the JWT Secret Key
 	err = tokens.LoadPrivateKey()
