@@ -1,6 +1,8 @@
 package assignments
 
 import (
+	"time"
+
 	"github.com/anuragrao04/superlit-backend/AI"
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/instantTest"
@@ -34,6 +36,12 @@ func Submit(c *gin.Context) {
 	database.DBLock.Lock()
 	database.DB.Preload("Questions").Preload("Questions.ExampleCases").Preload("Questions.TestCases").First(&assignment, submitRequest.AssignmentID)
 	database.DBLock.Unlock()
+
+	// Check if the assignment is active
+	if assignment.StartTime.After(time.Now()) || assignment.EndTime.Before(time.Now()) {
+		c.JSON(400, gin.H{"error": "Assignment is not active"})
+		return
+	}
 
 	// now we test the submission against both exampleCases and testCases
 	for _, question := range assignment.Questions {
