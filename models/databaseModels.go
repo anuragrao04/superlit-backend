@@ -115,7 +115,7 @@ type ExampleTestCase struct {
 type TestCase struct {
 	gorm.Model
 	QuestionID     uint   `json:"questionID"`
-	Input          string `'json:"input"`
+	Input          string `json:"input"`
 	ExpectedOutput string `json:"expectedOutput"`
 	Score          int    `json:"score"`
 }
