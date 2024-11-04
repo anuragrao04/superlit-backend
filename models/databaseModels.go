@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/anuragrao04/superlit-backend/events"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -126,4 +127,9 @@ type VerifiedTestCase struct {
 	Input          string `json:"input"`
 	ExpectedOutput string `json:"expectedOutput"`
 	ProducedOutput string `json:"producedOutput"`
+}
+
+func (u *User) AfterCreate(tx *gorm.DB) (err error) {
+	events.PublishUserCreated(u.Email)
+	return nil
 }

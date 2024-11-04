@@ -2,8 +2,10 @@ package mailers
 
 import (
 	"errors"
-	"gopkg.in/gomail.v2"
 	"os"
+
+	"github.com/anuragrao04/superlit-backend/events"
+	"gopkg.in/gomail.v2"
 )
 
 // these variables are global to this package
@@ -23,5 +25,10 @@ func Connect() error {
 	if DIALER == nil {
 		return errors.New("failed to connect to email server")
 	}
+
+	events.SubscribeUserCreated(func(email string) {
+		SendWelcomeEmail(email)
+	})
+
 	return nil
 }
