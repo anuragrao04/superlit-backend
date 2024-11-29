@@ -54,3 +54,14 @@ go run main.go
 ## Commit Conventions
 
 - Follow [conventionalcommits.org](https://www.conventionalcommits.org/en/v1.0.0/)
+
+## Future
+
+Here are the features planned to be implemented in the future: 
+
+1. The teacher must be able to access a list of students who are in the classroom but did not submit a particular assignment
+2. Migrate to Postgress from sqlite
+3. Implement passkeys for authentication
+4. Explore docker for code sandboxing instead of firejail since firejail only works on linux
+5. Regex for username matching. This regex must be supplied as an environment variable
+6. Feel free to raise issues of your own :)
