@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/data # persistent sqlite db
+    networks:
+      - app-network
+    privileged: true # required for firejail since it accesses system APIs
+
+  frontend:
+    build:
+      context: ../superlit-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+networks:
+  app-network:
+    driver: bridge
