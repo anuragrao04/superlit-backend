@@ -4,11 +4,10 @@ Backend For Superlit, Written In Go
 
 ## Setup using Docker
 
-1. populate the `.env` file. a template is provided in `.env.example`
+1. populate the `.env` file. a template is provided in `.env.example`. This project also requires a google cloud service account with google sheets API enabled. You can contact me for obtaining this google sheets key, or create your own service account.
+note: everything in the `.env` file is a secret and are not supposed to be shared.
 
-note: everything in the `.env` file and the private key are a secret and are not supposed to be shared.
-
-2. Clone the [frontend](https://github.com/anuragrao04/superlit-frontend) as well and place it adjacent to this directory:
+2. Clone the [frontend](https://github.com/anuragrao04/superlit-frontend) and place it adjacent to this directory:
 
 ```bash
 project-root/
