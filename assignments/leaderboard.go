@@ -46,7 +46,7 @@ func GetAssignmentLeaderboard(c *gin.Context) {
 
 	// sort formattedReturn by totalScore
 	sort.Slice(formattedReturn, func(i, j int) bool {
-		return formattedReturn[i].TotalScore < formattedReturn[j].TotalScore
+		return formattedReturn[i].TotalScore > formattedReturn[j].TotalScore
 	})
 
 	c.JSON(http.StatusOK, gin.H{"leaderboard": formattedReturn})

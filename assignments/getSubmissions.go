@@ -195,7 +195,7 @@ func GetAssignmentSubmissions(c *gin.Context) {
 
 	// sort formattedReturn by totalScore
 	sort.Slice(formattedReturn, func(i, j int) bool {
-		return formattedReturn[i].TotalScore < formattedReturn[j].TotalScore
+		return formattedReturn[i].TotalScore > formattedReturn[j].TotalScore
 	})
 
 	blacklist, err := database.GetAssignmentBlacklist(getSubmissionsRequest.AssignmentID)
