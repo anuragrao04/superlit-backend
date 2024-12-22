@@ -52,9 +52,9 @@ func HandleLogi(c *gin.Context) {
 		text :=
 			logLine.UserID +
 				"," +
-				strconv.Quote(logLine.EditorContentBefore) +
-				"," +
 				fmt.Sprint(logLine.CurrentQuestionIndex) +
+				"," +
+				strconv.Quote(logLine.EditorContentBefore) +
 				"," +
 				strconv.Quote(logLine.EditorContentAfter) +
 				"," +
