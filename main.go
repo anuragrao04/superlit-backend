@@ -120,6 +120,9 @@ func main() {
 	// get submissions for a student
 	router.POST("/assignment/getsubmissionforstudent", tokens.VerifyToken, assignments.GetStudentSubmission)
 
+	// get leaderboard for an assignment
+	router.POST("/assignment/getleaderboard", tokens.VerifyToken, assignments.GetAssignmentLeaderboard)
+
 	// google sheet population for assignment
 	router.POST("/assignment/populategooglesheet", tokens.VerifyToken, googleSheets.PopulateGoogleSheetAssignment)
 

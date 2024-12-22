@@ -34,6 +34,10 @@ type GetAssignmentSubmissionsRequest struct {
 	AssignmentID uint `json:"assignmentID"`
 }
 
+type GetAssignmentLeaderboardRequest struct {
+	AssignmentID uint `json:"assignmentID"`
+}
+
 type CreateInstantTestRequest struct {
 	Questions []Question `json:"questions"`
 	Email     string     `json:"email"`

@@ -38,7 +38,6 @@ func VerifyToken(c *gin.Context) {
 	if tokenString == "" {
 		log.Println("No token provided")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		log.Println("token expired")
 		c.Abort()
 		return
 	}

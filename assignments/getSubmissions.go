@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"slices"
+	"sort"
 
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
@@ -138,7 +139,7 @@ func GetAssignmentSubmissions(c *gin.Context) {
 	// access to this assignment. We must figure out a way to do this
 	// we only check that the user is a teacher
 
-	// now we fetch all the submissions from the instant test with the given private code
+	// now we fetch all the submissions from the instant test with the given assigmment ID
 	submissions, questionIDs, err := database.GetAssignmentSubmissions(getSubmissionsRequest.AssignmentID)
 	if err != nil {
 		if err.Error() == "No Such Assignment" {
@@ -152,7 +153,6 @@ func GetAssignmentSubmissions(c *gin.Context) {
 	}
 
 	// now we must do some formatting.
-
 	type answerSubmission struct {
 		QuestionNumber      uint   `json:"questionNumber"`
 		Score               uint   `json:"score"`
@@ -192,6 +192,11 @@ func GetAssignmentSubmissions(c *gin.Context) {
 		}
 		formattedReturn = append(formattedReturn, formattedSubmission)
 	}
+
+	// sort formattedReturn by totalScore
+	sort.Slice(formattedReturn, func(i, j int) bool {
+		return formattedReturn[i].TotalScore < formattedReturn[j].TotalScore
+	})
 
 	blacklist, err := database.GetAssignmentBlacklist(getSubmissionsRequest.AssignmentID)
 	if err != nil {
