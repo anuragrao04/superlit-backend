@@ -1,9 +1,10 @@
 package assignments
 
 import (
+	"cmp"
 	"log"
 	"net/http"
-	"sort"
+	"slices"
 
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
@@ -31,8 +32,9 @@ func GetAssignmentLeaderboard(c *gin.Context) {
 	}
 
 	type studentSubmission struct {
-		UniversityID string `json:"universityID"`
-		TotalScore   uint   `json:"totalScore"`
+		UniversityID      string `json:"universityID"`
+		TotalScore        uint   `json:"totalScore"`
+		AvgSubmissionTime uint   `json:"avgSubmissionTime"`
 	}
 
 	var formattedReturn = make([]studentSubmission, 0)
@@ -41,12 +43,19 @@ func GetAssignmentLeaderboard(c *gin.Context) {
 		var formattedSubmission studentSubmission
 		formattedSubmission.UniversityID = submission.UniversityID
 		formattedSubmission.TotalScore = uint(submission.TotalScore)
+		for _, answer := range submission.Answers {
+			formattedSubmission.AvgSubmissionTime += uint(answer.UpdatedAt.Unix())
+		}
+		formattedSubmission.AvgSubmissionTime = formattedSubmission.AvgSubmissionTime / uint(len(submission.Answers))
 		formattedReturn = append(formattedReturn, formattedSubmission)
 	}
 
 	// sort formattedReturn by totalScore
-	sort.Slice(formattedReturn, func(i, j int) bool {
-		return formattedReturn[i].TotalScore > formattedReturn[j].TotalScore
+	slices.SortFunc(formattedReturn, func(a, b studentSubmission) int {
+		return cmp.Or(
+			cmp.Compare(b.TotalScore, a.TotalScore),
+			cmp.Compare(a.AvgSubmissionTime, b.AvgSubmissionTime),
+		)
 	})
 
 	c.JSON(http.StatusOK, gin.H{"leaderboard": formattedReturn})

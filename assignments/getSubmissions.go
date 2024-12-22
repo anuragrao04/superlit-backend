@@ -1,11 +1,11 @@
 package assignments
 
 import (
+	"cmp"
 	"errors"
 	"log"
 	"net/http"
 	"slices"
-	"sort"
 
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
@@ -165,9 +165,10 @@ func GetAssignmentSubmissions(c *gin.Context) {
 	}
 
 	type studentSubmission struct {
-		UniversityID string             `json:"universityID"`
-		Submissions  []answerSubmission `json:"submissionsAnswer"`
-		TotalScore   uint               `json:"totalScore"`
+		UniversityID      string             `json:"universityID"`
+		Submissions       []answerSubmission `json:"submissionsAnswer"`
+		TotalScore        uint               `json:"totalScore"`
+		AvgSubmissionTime uint               `json:"avgSubmissionTime"`
 	}
 
 	var formattedReturn = make([]studentSubmission, 0)
@@ -189,13 +190,18 @@ func GetAssignmentSubmissions(c *gin.Context) {
 			formattedSubmission.Submissions[questionNumber].AIVivaTaken = answer.AIVivaTaken
 			formattedSubmission.Submissions[questionNumber].AIVivaScore = answer.AIVivaScore
 			formattedSubmission.Submissions[questionNumber].StudentsCode = answer.Code
+			formattedSubmission.AvgSubmissionTime += uint(answer.UpdatedAt.Unix())
 		}
+		formattedSubmission.AvgSubmissionTime = formattedSubmission.AvgSubmissionTime / uint(len(submission.Answers))
 		formattedReturn = append(formattedReturn, formattedSubmission)
 	}
 
 	// sort formattedReturn by totalScore
-	sort.Slice(formattedReturn, func(i, j int) bool {
-		return formattedReturn[i].TotalScore > formattedReturn[j].TotalScore
+	slices.SortFunc(formattedReturn, func(a, b studentSubmission) int {
+		return cmp.Or(
+			cmp.Compare(b.TotalScore, a.TotalScore),
+			cmp.Compare(a.AvgSubmissionTime, b.AvgSubmissionTime),
+		)
 	})
 
 	blacklist, err := database.GetAssignmentBlacklist(getSubmissionsRequest.AssignmentID)
