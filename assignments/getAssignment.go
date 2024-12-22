@@ -84,5 +84,13 @@ func GetAssignment(c *gin.Context) {
 
 	// now that we have done our checks, we can return the assignment
 	prettyPrint.PrettyPrint(assignment)
-	c.JSON(200, gin.H{"questions": assignment.Questions, "startTime": assignment.StartTime, "endTime": assignment.EndTime})
+	c.JSON(200, gin.H{
+		"questions":               assignment.Questions,
+		"startTime":               assignment.StartTime,
+		"endTime":                 assignment.EndTime,
+		"enableAIViva":            assignment.EnableAIViva,
+		"enableAIHint":            assignment.EnableAIHint,
+		"enableLeaderboard":       assignment.EnableLeaderboard,
+		"maxWindowChangeAttempts": assignment.MaxWindowChangeAttempts,
+	})
 }

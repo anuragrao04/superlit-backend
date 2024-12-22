@@ -93,12 +93,16 @@ type ListAssignmentsRequest struct {
 }
 
 type CreateAssignmentRequest struct {
-	Name         string     `json:"name"`
-	Description  string     `json:"description"`
-	Questions    []Question `json:"questions"`
-	ClassroomIDs []uint     `json:"classroomIDs"` // IDs of the classroom the assignment is to be assigned to
-	StartTime    time.Time  `json:"startTime"`    // start time of the assignment
-	EndTime      time.Time  `json:"endTime"`      // end time of the assignment
+	Name                    string     `json:"name"`
+	Description             string     `json:"description"`
+	Questions               []Question `json:"questions"`
+	ClassroomIDs            []uint     `json:"classroomIDs"` // IDs of the classroom the assignment is to be assigned to
+	StartTime               time.Time  `json:"startTime"`    // start time of the assignment
+	EndTime                 time.Time  `json:"endTime"`      // end time of the assignment
+	EnableAIViva            bool       `json:"enableAIViva"`
+	EnableAIHint            bool       `json:"enableAIHint"`
+	EnableLeaderboard       bool       `json:"enableLeaderboard"`
+	MaxWindowChangeAttempts int        `json:"maxWindowChangeAttempts"`
 }
 
 type GetAssignmentRequest struct {

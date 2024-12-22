@@ -16,6 +16,7 @@ func CreateAssignment(c *gin.Context) {
 	err := c.BindJSON(&request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request"})
+		log.Println(err.Error())
 		return
 	}
 	value, ok := c.Get("claims")
@@ -71,6 +72,11 @@ func CreateAssignment(c *gin.Context) {
 	newAssignment.Description = request.Description
 	newAssignment.StartTime = request.StartTime
 	newAssignment.EndTime = request.EndTime
+	newAssignment.EnableAIViva = request.EnableAIViva
+	newAssignment.EnableAIHint = request.EnableAIHint
+	newAssignment.EnableLeaderboard = request.EnableLeaderboard
+	newAssignment.MaxWindowChangeAttempts = request.MaxWindowChangeAttempts
+
 	newAssignment.Questions = request.Questions
 
 	// TODO: Move this to database package

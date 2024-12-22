@@ -47,7 +47,7 @@ func main() {
 	}
 
 	// connect to the database
-	_, err = database.Connect("/data/holy.db")
+	_, err = database.Connect(os.Getenv("DB_PATH"))
 	if err != nil {
 		log.Fatal(err)
 	} else {
