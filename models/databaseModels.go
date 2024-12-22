@@ -85,7 +85,7 @@ type Answer struct {
 	InstantTestSubmissionID uint               `json:"instantTestSubmissionID"`
 	QuestionID              uint               `json:"questionID"`
 	Code                    string             `json:"code"`
-	TestCases               []VerifiedTestCase `json:"testCases"`
+	TestCases               []VerifiedTestCase `gorm:"constraint:OnDelete:CASCADE;" json:"testCases"`
 	Score                   int                `json:"score"`               // total score for this particular question
 	AIVerified              bool               `json:"AIVerified"`          // if AI has verified the code
 	AIVerdict               bool               `json:"AIVerdict"`           // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy

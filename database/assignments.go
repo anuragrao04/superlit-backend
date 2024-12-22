@@ -108,7 +108,7 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 					tx.Model(&submission).Where("id = ?", submission.ID).Update("total_score", submission.TotalScore)
 
 					// Replace the old answer
-					tx.Model(&submission).Association("Answers").Delete(existingAnswer)
+					tx.Model(&submission).Association("Answers").Unscoped().Delete(existingAnswer) // cascading delete for test cases too
 					tx.Model(&submission).Association("Answers").Append(&newAnswer)
 
 					// prettyPrint.PrettyPrint(submission)
