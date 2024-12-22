@@ -11,14 +11,15 @@ import (
 )
 
 type LogFormat struct {
-	UserID              string `json:"userID"`
-	EditorContentBefore string `json:"editorContentBefore"`
-	EditorContentAfter  string `json:"editorContentAfter"`
-	Timestamp           string `json:"timestamp"`
-	IsPaste             bool   `json:"isPaste"`
-	IsDeletion          bool   `json:"isDeletion"`
-	IsCompilation       bool   `json:"isCompilation"`
-	IsSubmission        bool   `json:"isSubmission"`
+	UserID               string `json:"userID"`
+	CurrentQuestionIndex int    `json:"currentQuestionIndex"`
+	EditorContentBefore  string `json:"editorContentBefore"`
+	EditorContentAfter   string `json:"editorContentAfter"`
+	Timestamp            string `json:"timestamp"`
+	IsPaste              bool   `json:"isPaste"`
+	IsDeletion           bool   `json:"isDeletion"`
+	IsCompilation        bool   `json:"isCompilation"`
+	IsSubmission         bool   `json:"isSubmission"`
 }
 
 type LogiRequest struct {
@@ -52,6 +53,8 @@ func HandleLogi(c *gin.Context) {
 			logLine.UserID +
 				"," +
 				strconv.Quote(logLine.EditorContentBefore) +
+				"," +
+				fmt.Sprint(logLine.CurrentQuestionIndex) +
 				"," +
 				strconv.Quote(logLine.EditorContentAfter) +
 				"," +
