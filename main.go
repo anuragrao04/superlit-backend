@@ -12,6 +12,7 @@ import (
 	"github.com/anuragrao04/superlit-backend/AI"
 	"github.com/anuragrao04/superlit-backend/assignments"
 	"github.com/anuragrao04/superlit-backend/auth"
+	"github.com/anuragrao04/superlit-backend/capstoneLogi"
 	"github.com/anuragrao04/superlit-backend/classroom"
 	"github.com/anuragrao04/superlit-backend/compile"
 	"github.com/anuragrao04/superlit-backend/database"
@@ -175,6 +176,9 @@ func main() {
 
 	// Populate google sheet with instant test submission data
 	router.POST("/instanttest/populategooglesheet", googleSheets.PopulateGoogleSheetInstantTest)
+
+	// capstone logi
+	router.POST("/capstone-logi", capstoneLogi.HandleLogi)
 
 	s := &http.Server{
 		Addr:         ":6969",
