@@ -41,7 +41,7 @@ type Assignment struct {
 	EnableLeaderboard       bool                   `json:"enableLeaderboard"`
 	MaxWindowChangeAttempts int                    `json:"maxWindowChangeAttempts"`
 	Classrooms              []Classroom            `gorm:"many2many:assignment_classroom;" json:"classrooms"`
-	Questions               []Question             `gorm:"foreignKey:AssignmentID" json:"questions"`
+	Questions               []Question             `gorm:"foreignKey:AssignmentID" gorm:"constraint:OnDelete:CASCADE;" json:"questions"`
 	BlacklistedStudents     []User                 `gorm:"many2many:assignment_user_blacklist;" json:"blacklistedStudents"` // students who've been caught cheating
 	Submissions             []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"submissions"`
 	// this is the classrooms in which the assignment is assigned.

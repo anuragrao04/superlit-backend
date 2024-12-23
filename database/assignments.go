@@ -184,6 +184,11 @@ func GetAssignmentSubmissionPerStudent(assignmentID, userID uint) (submission mo
 
 func SaveAssignment(assignment models.Assignment) error {
 	err := DB.Session(&gorm.Session{FullSaveAssociations: true}).Save(&assignment).Error
+	if err != nil {
+		return err
+	}
+
+	err = DB.Model(&assignment).Association("Questions").Unscoped().Replace(assignment.Questions)
 	log.Println("Saved to db")
 	return err
 }
