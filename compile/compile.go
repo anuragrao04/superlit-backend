@@ -191,9 +191,15 @@ func RunBinary(input string, command ...string) string {
 	cmd.Stdin = strings.NewReader(input)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
+		// If the process was killed by the context timeout:
 		if err.Error() == "signal: killed" {
 			return "Timed Out! Make sure there aren't any infinite loops in your program"
 		}
+		// Otherwise, return the stderr/stdout (which will likely contain the Python error).
+		if len(output) > 0 {
+			return string(output)
+		}
+		// If for some reason 'output' is empty, then return the generic error message
 		return err.Error()
 	}
 	return string(output)
