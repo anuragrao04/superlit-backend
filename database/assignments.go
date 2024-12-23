@@ -77,6 +77,7 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 		var submission models.AssignmentSubmission
 		err := tx.Preload("Answers").Preload("Answers.TestCases").Where("assignment_id = ? AND user_id = ?", assignmentID, userID).First(&submission).Error
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			log.Println("Failed to load answers location 1")
 			return err // Error other than record not found
 		}
 
@@ -90,6 +91,7 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 				TotalScore:   newAnswer.Score,
 			}
 			if err := tx.Create(&submission).Error; err != nil {
+				log.Println("Failed to create submission")
 				return err
 			}
 		} else {
@@ -126,6 +128,7 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 			}
 
 			if err := tx.Save(&submission).Error; err != nil {
+				log.Println("Failed to save submission location 2")
 				return err
 			}
 		}
