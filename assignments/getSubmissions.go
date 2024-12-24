@@ -173,23 +173,33 @@ func GetAssignmentSubmissions(c *gin.Context) {
 
 	var formattedReturn = make([]studentSubmission, 0)
 
-	minQuestionID := slices.Min(questionIDs)
+	questionIndex := make(map[uint]int, len(questionIDs))
+	for i, qid := range questionIDs {
+		questionIndex[qid] = i
+	}
 
 	for _, submission := range submissions {
 		var formattedSubmission studentSubmission
 		formattedSubmission.UniversityID = submission.UniversityID
 		formattedSubmission.TotalScore = uint(submission.TotalScore)
+
 		formattedSubmission.Submissions = make([]answerSubmission, len(questionIDs))
 		for _, answer := range submission.Answers {
-			questionNumber := answer.QuestionID - minQuestionID
-			formattedSubmission.Submissions[questionNumber].Score = uint(answer.Score)
-			formattedSubmission.Submissions[questionNumber].QuestionNumber = uint(questionNumber + 1)
-			formattedSubmission.Submissions[questionNumber].AIVerified = answer.AIVerified
-			formattedSubmission.Submissions[questionNumber].AIVerdict = answer.AIVerdict
-			formattedSubmission.Submissions[questionNumber].AIVerdictFailReason = answer.AIVerdictFailReason
-			formattedSubmission.Submissions[questionNumber].AIVivaTaken = answer.AIVivaTaken
-			formattedSubmission.Submissions[questionNumber].AIVivaScore = answer.AIVivaScore
-			formattedSubmission.Submissions[questionNumber].StudentsCode = answer.Code
+			idx, ok := questionIndex[answer.QuestionID]
+			if !ok {
+				// this should not happen but just in case
+				log.Println("QuestionIDs not found in questionIndex")
+				continue // skip this question
+			}
+
+			formattedSubmission.Submissions[idx].Score = uint(answer.Score)
+			formattedSubmission.Submissions[idx].QuestionNumber = uint(idx + 1)
+			formattedSubmission.Submissions[idx].AIVerified = answer.AIVerified
+			formattedSubmission.Submissions[idx].AIVerdict = answer.AIVerdict
+			formattedSubmission.Submissions[idx].AIVerdictFailReason = answer.AIVerdictFailReason
+			formattedSubmission.Submissions[idx].AIVivaTaken = answer.AIVivaTaken
+			formattedSubmission.Submissions[idx].AIVivaScore = answer.AIVivaScore
+			formattedSubmission.Submissions[idx].StudentsCode = answer.Code
 			formattedSubmission.AvgSubmissionTime += uint(answer.UpdatedAt.Unix())
 		}
 		formattedSubmission.AvgSubmissionTime = formattedSubmission.AvgSubmissionTime / uint(len(submission.Answers))
