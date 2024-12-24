@@ -110,8 +110,10 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 					tx.Model(&submission).Where("id = ?", submission.ID).Update("total_score", submission.TotalScore)
 
 					// Replace the old answer
-					tx.Model(&submission).Association("Answers").Unscoped().Delete(existingAnswer) // cascading delete for test cases too
-					tx.Model(&submission).Association("Answers").Append(&newAnswer)
+					tx.Model(&submission).Association("Answers").Delete(existingAnswer)
+					// cascading delete for test cases too
+					tx.Where("AnswerID = ?", existingAnswer.ID).Delete(&models.VerifiedTestCase{})
+					tx.Session(&gorm.Session{FullSaveAssociations: true}).Model(&submission).Association("Answers").Append(&newAnswer)
 
 					// prettyPrint.PrettyPrint(submission)
 					answerExists = true
