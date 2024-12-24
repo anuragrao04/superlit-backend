@@ -67,10 +67,10 @@ func GetStudentSubmission(c *gin.Context) {
 		return
 	}
 
-	// now we must do some formatting.
-	// we need to find the min questionID to get the question numbers
-
-	minQuestionID := slices.Min(questionIDs)
+	questionIndex := make(map[uint]int, len(questionIDs))
+	for i, qid := range questionIDs {
+		questionIndex[qid] = i
+	}
 
 	type returnFormatArrayElement struct {
 		QuestionNumber      uint                      `json:"questionNumber"`
@@ -92,25 +92,31 @@ func GetStudentSubmission(c *gin.Context) {
 	var returnArray = make([]returnFormatArrayElement, len(questionIDs))
 
 	for _, question := range questions {
-		questionNumberIndex := question.ID - minQuestionID
-		returnArray[questionNumberIndex].QuestionTitle = question.Title
-		returnArray[questionNumberIndex].QuestionDescription = question.Question
-		returnArray[questionNumberIndex].QuestionNumber = questionNumberIndex + 1
+		idx, ok := questionIndex[question.ID]
+		if !ok {
+			// this should not happen but just in case
+			log.Println("QuestionIDs not found in questionIndex")
+			continue // skip this question
+		}
+
+		returnArray[idx].QuestionTitle = question.Title
+		returnArray[idx].QuestionDescription = question.Question
+		returnArray[idx].QuestionNumber = uint(idx + 1)
 		answer, err := getAnswer(submission.Answers, question.ID)
 		if err != nil {
-			returnArray[questionNumberIndex].Attempted = false
+			returnArray[idx].Attempted = false
 			continue
 		} else {
-			returnArray[questionNumberIndex].Attempted = true
+			returnArray[idx].Attempted = true
 		}
-		returnArray[questionNumberIndex].Code = answer.Code
-		returnArray[questionNumberIndex].AIVerified = answer.AIVerified
-		returnArray[questionNumberIndex].AIVerdict = answer.AIVerdict
-		returnArray[questionNumberIndex].AIVerdictFailReason = answer.AIVerdictFailReason
-		returnArray[questionNumberIndex].AIVivaTaken = answer.AIVivaTaken
-		returnArray[questionNumberIndex].AIVivaScore = answer.AIVivaScore
-		returnArray[questionNumberIndex].Score = answer.Score
-		returnArray[questionNumberIndex].TestCases = stripCases(answer.TestCases)
+		returnArray[idx].Code = answer.Code
+		returnArray[idx].AIVerified = answer.AIVerified
+		returnArray[idx].AIVerdict = answer.AIVerdict
+		returnArray[idx].AIVerdictFailReason = answer.AIVerdictFailReason
+		returnArray[idx].AIVivaTaken = answer.AIVivaTaken
+		returnArray[idx].AIVivaScore = answer.AIVivaScore
+		returnArray[idx].Score = answer.Score
+		returnArray[idx].TestCases = stripCases(answer.TestCases)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"answers": returnArray, "totalScore": submission.TotalScore})
