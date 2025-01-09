@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/anuragrao04/superlit-backend/models"
+	"github.com/anuragrao04/superlit-backend/prettyPrint"
 	"gorm.io/gorm"
 	// "github.com/anuragrao04/superlit-backend/prettyPrint"
 )
@@ -99,21 +100,17 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 			answerExists := false
 
 			for _, existingAnswer := range submission.Answers {
-
 				if existingAnswer.QuestionID == newAnswer.QuestionID {
 					log.Println("Answer exists")
 					// Update existing answer
+					prettyPrint.PrettyPrint(existingAnswer)
 
+					tx.Model(&existingAnswer).Updates(newAnswer)
+					tx.Model(&existingAnswer).Association("TestCases").Replace(newAnswer.TestCases)
 					submission.TotalScore -= existingAnswer.Score // Subtract old score
 					submission.TotalScore += newAnswer.Score      // Add new score
-					// update the above in the database
 					tx.Model(&submission).Where("id = ?", submission.ID).Update("total_score", submission.TotalScore)
-
-					// Replace the old answer
-					tx.Model(&submission).Association("Answers").Delete(existingAnswer)
-					// cascading delete for test cases too
-					tx.Where("AnswerID = ?", existingAnswer.ID).Delete(&models.VerifiedTestCase{})
-					tx.Session(&gorm.Session{FullSaveAssociations: true}).Model(&submission).Association("Answers").Append(&newAnswer)
+					prettyPrint.PrettyPrint(newAnswer)
 
 					// prettyPrint.PrettyPrint(submission)
 					answerExists = true
@@ -124,14 +121,11 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 			}
 
 			if !answerExists {
+				log.Println("Answer doesn't exist")
 				// Answer doesn't exist, append the new answer
-				submission.Answers = append(submission.Answers, newAnswer)
 				submission.TotalScore += newAnswer.Score
-			}
-
-			if err := tx.Save(&submission).Error; err != nil {
-				log.Println("Failed to save submission location 2")
-				return err
+				tx.Model(&submission).Where("id = ?", submission.ID).Update("total_score", submission.TotalScore)
+				tx.Session(&gorm.Session{FullSaveAssociations: true}).Model(&submission).Association("Answers").Append(&newAnswer)
 			}
 		}
 

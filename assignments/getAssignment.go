@@ -7,7 +7,6 @@ import (
 
 	"github.com/anuragrao04/superlit-backend/database"
 	"github.com/anuragrao04/superlit-backend/models"
-	"github.com/anuragrao04/superlit-backend/prettyPrint"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -83,7 +82,7 @@ func GetAssignment(c *gin.Context) {
 	}
 
 	// now that we have done our checks, we can return the assignment
-	prettyPrint.PrettyPrint(assignment)
+	// prettyPrint.PrettyPrint(assignment)
 	c.JSON(200, gin.H{
 		"questions":               assignment.Questions,
 		"startTime":               assignment.StartTime,
