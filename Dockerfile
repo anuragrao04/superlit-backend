@@ -1,6 +1,6 @@
 # ---- Base Stage ----
 FROM golang:1.23 AS base
-WORKDIR /superlit/backend
+WORKDIR /superlit-backend
 
 # Install firejail
 RUN apt-get update && apt-get install -y firejail
