@@ -93,12 +93,12 @@ services:
   # ----- Ollama Service - Prod only -----
   ollama:
     profiles: [prod]
-    image: ollama/ollama:latest # Replace with the correct Ollama image
+    image: ollama/ollama:latest
     volumes:
-      - ../superlit-AI/Modelfile-generic:/models/superlit-generic # Mount the modelfile
-      - ollama_data:/ollama/models # Persistent storage for models
+      - ../superlit-AI:/models
+      - ollama_data:/root/.ollama
     environment:
-      - OLLAMA_MODEL_PATH=/models/superlit-generic # Configure Ollama to use the modelfile
+      - OLLAMA_MODEL_PATH=/models
     networks:
       - superlit-network
     ports:
