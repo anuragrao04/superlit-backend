@@ -4,6 +4,7 @@ services:
   # ----- Backend Service - Production -----
   backend-prod:
     profiles: [prod]
+    working_dir: /superlit/backend
     env_file: .env
     restart: unless-stopped
     build:

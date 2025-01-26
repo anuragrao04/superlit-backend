@@ -22,4 +22,4 @@ CMD ["go", "run", "main.go"]
 FROM base AS prod
 # Build and run the Go application
 RUN go build .
-CMD ["./superlit-backend"]
+CMD ["/superlit/backend/superlit-backend"]
