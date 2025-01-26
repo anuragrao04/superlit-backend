@@ -48,7 +48,7 @@ func main() {
 	}
 
 	// connect to the database
-	_, err = database.Connect(os.Getenv("DB_PATH"))
+	_, err = database.Connect(os.Getenv("POSTGRES_DSN"))
 	if err != nil {
 		log.Fatal(err)
 	} else {

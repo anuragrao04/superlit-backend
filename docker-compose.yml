@@ -1,25 +1,115 @@
+name: superlit
+
 services:
-  backend:
+  # ----- Backend Service - Production -----
+  backend-prod:
+    profiles: [prod]
+    env_file: .env
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - ./data:/data # persistent sqlite db
+      target: prod
     networks:
-      - app-network
-    privileged: true # required for firejail since it accesses system APIs
+      - superlit-network
+    privileged: true # Required for Firejail
+    depends_on:
+      - postgres
+      - ollama # Ollama is only active in production
 
-  frontend:
+  # ----- Frontend Service - Production -----
+  frontend-prod:
+    profiles: [prod]
+    env_file:
+      - ../superlit-frontend/.env
     build:
       context: ../superlit-frontend
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
+      target: prod
     networks:
-      - app-network
+      - superlit-network
+    ports:
+      - "80:80" # Expose frontend port for production
     depends_on:
-      - backend
+      - backend-prod
 
+  # ----- Backend Service - Development -----
+  backend-dev:
+    profiles: [dev]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    networks:
+      - superlit-network
+    privileged: true # Required for Firejail
+    ports:
+      - 6969:6969 # this port is exposed to host only in dev
+    depends_on:
+      - postgres
+    develop:
+      watch:
+        - action: sync+restart
+          path: .
+          target: /superlit/backend
+
+  # ----- Frontend Service - Development -----
+  frontend-dev:
+    profiles: [dev]
+    env_file:
+      - ../superlit-frontend/.env
+    build:
+      context: ../superlit-frontend
+      dockerfile: Dockerfile
+      target: dev
+    networks:
+      - superlit-network
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend-dev
+    develop:
+      watch:
+        - action: sync
+          path: ../superlit-frontend
+          target: /superlit/frontend
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ../superlit-frontend/package.json
+
+  # ----- PostgreSQL Service - In Both Prod & Dev-----
+  postgres:
+    profiles: [prod, dev]
+    image: postgres:15-alpine
+    env_file: .env
+    environment:
+      POSTGRES_DB: superlit_db
+      POSTGRES_USER: superlit_user
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistent storage
+    networks:
+      - superlit-network
+
+  # ----- Ollama Service - Prod only -----
+  ollama:
+    profiles: [prod]
+    image: ollama/ollama:latest # Replace with the correct Ollama image
+    volumes:
+      - ../superlit-AI/Modelfile-generic:/models/superlit-generic # Mount the modelfile
+      - ollama_data:/ollama/models # Persistent storage for models
+    environment:
+      - OLLAMA_MODEL_PATH=/models/superlit-generic # Configure Ollama to use the modelfile
+    networks:
+      - superlit-network
+    ports:
+      - "11434:11434" # Expose Ollama port to host
+
+# ----- Volumes -----
+volumes:
+  postgres_data:
+  ollama_data:
+
+# ----- Networks -----
 networks:
-  app-network:
+  superlit-network:
     driver: bridge

@@ -178,11 +178,8 @@ func CompileBinary(file string, language string) (compiledBinary string, err err
 // output: the output of the binary including stdout and stderror
 
 func RunBinary(input string, command ...string) string {
-	environment := os.Getenv("ENVIRONMENT")
 
-	if environment == "PROD" {
-		command = append([]string{"firejail", "--quiet", "--profile=superlit"}, command...)
-	} // else no firejail
+	command = append([]string{"firejail", "--quiet", "--profile=superlit"}, command...)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

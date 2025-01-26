@@ -1,21 +1,25 @@
-FROM golang:1.23
+# ---- Base Stage ----
+FROM golang:1.23 AS base
+WORKDIR /superlit/backend
 
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y \
-        sqlite3 \
-        libsqlite3-dev \
-        firejail
+# Install firejail
+RUN apt-get update && apt-get install -y firejail
 
-WORKDIR /app
-
+# Copy Go module files and download dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Copy the entire backend source code
 COPY . .
-
-RUN go build -o backend .
 
 EXPOSE 6969
 
-CMD ["./backend"]
+# ---- Development Stage ----
+FROM base AS dev
+CMD ["go", "run", "main.go"]
+
+# ---- Production Stage ----
+FROM base AS prod
+# Build and run the Go application
+RUN go build -o /superlit/backend .
+CMD ["/superlit/backend"]
