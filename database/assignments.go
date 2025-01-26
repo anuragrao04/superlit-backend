@@ -7,7 +7,7 @@ import (
 	"log"
 
 	"github.com/anuragrao04/superlit-backend/models"
-	"github.com/anuragrao04/superlit-backend/prettyPrint"
+	// "github.com/anuragrao04/superlit-backend/prettyPrint"
 	"gorm.io/gorm"
 	// "github.com/anuragrao04/superlit-backend/prettyPrint"
 )
@@ -84,6 +84,7 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Submission doesn't exist, create a new one
+			log.Println("Submission doesn't exist. Creating")
 			submission = models.AssignmentSubmission{
 				AssignmentID: assignmentID,
 				UserID:       userID,
@@ -103,14 +104,15 @@ func UpsertAssignmentSubmissionAndAnswers(assignmentID uint, userID uint, univer
 				if existingAnswer.QuestionID == newAnswer.QuestionID {
 					log.Println("Answer exists")
 					// Update existing answer
-					prettyPrint.PrettyPrint(existingAnswer)
+					// prettyPrint.PrettyPrint(existingAnswer)
 
+					tx.Delete(&existingAnswer.TestCases)
 					tx.Model(&existingAnswer).Updates(newAnswer)
-					tx.Model(&existingAnswer).Association("TestCases").Replace(newAnswer.TestCases)
+					tx.Session(&gorm.Session{FullSaveAssociations: true}).Model(&existingAnswer).Association("TestCases").Append(newAnswer.TestCases)
 					submission.TotalScore -= existingAnswer.Score // Subtract old score
 					submission.TotalScore += newAnswer.Score      // Add new score
 					tx.Model(&submission).Where("id = ?", submission.ID).Update("total_score", submission.TotalScore)
-					prettyPrint.PrettyPrint(newAnswer)
+					// prettyPrint.PrettyPrint(newAnswer)
 
 					// prettyPrint.PrettyPrint(submission)
 					answerExists = true

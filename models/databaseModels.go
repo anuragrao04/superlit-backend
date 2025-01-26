@@ -41,7 +41,7 @@ type Assignment struct {
 	EnableLeaderboard       bool                   `json:"enableLeaderboard"`
 	MaxWindowChangeAttempts int                    `json:"maxWindowChangeAttempts"`
 	Classrooms              []Classroom            `gorm:"many2many:assignment_classroom;" json:"classrooms"`
-	Questions               []Question             `gorm:"foreignKey:AssignmentID" gorm:"constraint:OnDelete:CASCADE;" json:"questions"`
+	Questions               []Question             `gorm:"polymorphic:Parent;" json:"questions"`
 	BlacklistedStudents     []User                 `gorm:"many2many:assignment_user_blacklist;" json:"blacklistedStudents"` // students who've been caught cheating
 	Submissions             []AssignmentSubmission `gorm:"foreignKey:AssignmentID" json:"submissions"`
 	// this is the classrooms in which the assignment is assigned.
@@ -57,7 +57,7 @@ type InstantTest struct {
 	PrivateCode              string                  `json:"privateCode"`
 	PublicCode               string                  `json:"publicCode"`
 	IsActive                 bool                    `json:"isActive"`
-	Questions                []Question              `gorm:"foreignKey:InstantTestID" json:"questions"`
+	Questions                []Question              `gorm:"polymorphic:Parent;" json:"questions"`
 	Submissions              []InstantTestSubmission `gorm:"foreignKey:InstantTestID" json:"submissions"`
 	BlacklistedUniversityIDs pq.StringArray          `json:"blacklistedUniversityIDs" gorm:"type:text[]"` // students who've been caught cheatingy
 }
@@ -66,7 +66,7 @@ type InstantTestSubmission struct {
 	gorm.Model
 	InstantTestID uint     `json:"instantTestID"`
 	UniversityID  string   `json:"universityID"`
-	Answers       []Answer `json:"answers"`
+	Answers       []Answer `gorm:"polymorphic:Parent;" json:"answers"`
 	TotalScore    int      `json:"totalScore"`
 }
 
@@ -75,29 +75,29 @@ type AssignmentSubmission struct {
 	AssignmentID uint     `json:"assignmentID"`
 	UserID       uint     `json:"userID"`
 	UniversityID string   `json:"universityID"`
-	Answers      []Answer `json:"answers"`
+	Answers      []Answer `gorm:"polymorphic:Parent;" json:"answers"`
 	TotalScore   int      `json:"totalScore"`
 }
 
 type Answer struct {
 	gorm.Model
-	AssignmentSubmissionID  uint               `json:"assignmentSubmissionID"`
-	InstantTestSubmissionID uint               `json:"instantTestSubmissionID"`
-	QuestionID              uint               `json:"questionID"`
-	Code                    string             `json:"code"`
-	TestCases               []VerifiedTestCase `gorm:"constraint:OnDelete:CASCADE;" json:"testCases"`
-	Score                   int                `json:"score"`               // total score for this particular question
-	AIVerified              bool               `json:"AIVerified"`          // if AI has verified the code
-	AIVerdict               bool               `json:"AIVerdict"`           // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
-	AIVerdictFailReason     string             `json:"AIVerdictFailReason"` // if AI has flagged this answer, the reason why
-	AIVivaScore             int                `json:"AIVivaScore"`         // how many viva questions did the student answer correctly
-	AIVivaTaken             bool               `json:"AIVivaTaken"`         // if the student has taken the viva, or somehow hit back and not answered
+	ParentID            uint               `json:"parentID"`
+	ParentType          string             `json:"parentType"`
+	QuestionID          uint               `json:"questionID"`
+	Code                string             `json:"code"`
+	TestCases           []VerifiedTestCase `gorm:"constraint:OnDelete:CASCADE;" json:"testCases"`
+	Score               int                `json:"score"`               // total score for this particular question
+	AIVerified          bool               `json:"AIVerified"`          // if AI has verified the code
+	AIVerdict           bool               `json:"AIVerdict"`           // if AI has verified the code, this is the verdict. If true, it means it's aproved. else something is fishy
+	AIVerdictFailReason string             `json:"AIVerdictFailReason"` // if AI has flagged this answer, the reason why
+	AIVivaScore         int                `json:"AIVivaScore"`         // how many viva questions did the student answer correctly
+	AIVivaTaken         bool               `json:"AIVivaTaken"`         // if the student has taken the viva, or somehow hit back and not answered
 }
 
 type Question struct {
 	gorm.Model
-	AssignmentID   uint              `json:"assignmentID"`
-	InstantTestID  uint              `json:"instantTestID"`
+	ParentID       uint              `json:"parentID"`
+	ParentType     string            `json:"parentType"`
 	Title          string            `json:"title"`
 	Question       string            `json:"question"`
 	ExampleCases   []ExampleTestCase `json:"exampleCases"`
@@ -125,6 +125,7 @@ type TestCase struct {
 }
 
 type VerifiedTestCase struct {
+	gorm.Model
 	AnswerID       uint   `json:"answerID"`
 	Passed         bool   `json:"passed"`
 	Input          string `json:"input"`

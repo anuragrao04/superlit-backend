@@ -3,7 +3,7 @@ FROM golang:1.23 AS base
 WORKDIR /superlit/backend
 
 # Install firejail
-RUN apt-get update && apt-get install -y firejail
+RUN apt-get update && apt-get install -y firejail python3 gcc
 
 # Copy Go module files and download dependencies
 COPY go.mod go.sum ./
@@ -12,6 +12,8 @@ RUN go mod download
 # Copy the entire backend source code
 COPY . .
 
+# Copy firejail profile
+COPY firejail/superlit.profile /etc/firejail/superlit.profile
 
 # ---- Development Stage ----
 FROM base AS dev
