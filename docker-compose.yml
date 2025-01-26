@@ -37,6 +37,7 @@ services:
   # ----- Backend Service - Development -----
   backend-dev:
     profiles: [dev]
+    env_file: .env
     build:
       context: .
       dockerfile: Dockerfile

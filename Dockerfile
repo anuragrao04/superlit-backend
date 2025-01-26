@@ -21,5 +21,5 @@ CMD ["go", "run", "main.go"]
 # ---- Production Stage ----
 FROM base AS prod
 # Build and run the Go application
-RUN go build -o /superlit/backend .
-CMD ["/superlit/backend"]
+RUN go build .
+CMD ["./superlit-backend"]
