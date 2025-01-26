@@ -1,6 +1,6 @@
 # ---- Base Stage ----
 FROM golang:1.23 AS base
-WORKDIR /superlit-backend
+WORKDIR /superlit/backend
 
 # Install firejail
 RUN apt-get update && apt-get install -y firejail
@@ -12,10 +12,10 @@ RUN go mod download
 # Copy the entire backend source code
 COPY . .
 
-EXPOSE 6969
 
 # ---- Development Stage ----
 FROM base AS dev
+EXPOSE 6969
 CMD ["go", "run", "main.go"]
 
 # ---- Production Stage ----
