@@ -103,11 +103,18 @@ services:
       - ../superlit-AI:/models
       - ollama_data:/root/.ollama
     environment:
-      - OLLAMA_MODEL_PATH=/models
+      - OLLAMA_KEEP_ALIVE=24h
     networks:
       - superlit-network
     ports:
       - "11434:11434" # Expose Ollama port to host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
 # ----- Volumes -----
 volumes:
