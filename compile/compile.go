@@ -178,7 +178,10 @@ func CompileBinary(file string, language string) (compiledBinary string, err err
 // output: the output of the binary including stdout and stderror
 
 func RunBinary(input string, command ...string) string {
-	command = append([]string{"firejail", "--quiet", "--profile=superlit"}, command...)
+	command = append([]string{"firejail", "--quiet", "--profile=superlit", "--disable-sandbox-check"}, command...)
+	// --disable-sandbox-check is a new flag introduced in https://github.com/netblue30/firejail/pull/6592
+	// since we are running this inside docker, this is necessary. Although, not recommended
+	// We should move to a dedicated microservice for compiling code in the future, most probably: https://github.com/thealcodingclub/CodeExecutionAPI
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
